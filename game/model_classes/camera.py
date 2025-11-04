@@ -52,7 +52,7 @@ class Camera(Entity):
         """Move by the given amount in the (forwards, right, up) vectors.
         """
         self.position = new_pos
-        if not GLOBAL.DEBUG_FLY: self.position[2] = 1 # hard coding the z constraint
+        # if not GLOBAL.DEBUG_FLY: self.position[2] = 1 # hard coding the z constraint
 
 
     def spin(self, d_eulers) -> None:
