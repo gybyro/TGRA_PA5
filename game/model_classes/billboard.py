@@ -20,10 +20,19 @@ class Billboard(Entity):
     def update(self, camera_pos: np.ndarray) -> None:
         """Rotate so the billboard faces the active camera."""
         self_to_camera = camera_pos - self.position
-        self.rotation[2] = -np.degrees(np.arctan2(-self_to_camera[1], self_to_camera[0]))
-        dist2d = pyrr.vector.length(self_to_camera)
-        self.rotation[1] = -np.degrees(np.arctan2(self_to_camera[2], dist2d))
 
+        if np.allclose(self_to_camera, 0.0):
+            return
+        
+        forward = pyrr.vector.normalize(self_to_camera)
+        horizontal_dist = np.linalg.norm(forward[:2])
+
+        yaw = np.degrees(np.arctan2(forward[1], forward[0]))
+        pitch = 0.0 if horizontal_dist == 0.0 else -np.degrees(np.arctan2(forward[2], horizontal_dist))
+
+        self.rotation[0] = 0.0
+        self.rotation[1] = pitch
+        self.rotation[2] = yaw
 
 
 class AnimatedBillboard(Billboard):

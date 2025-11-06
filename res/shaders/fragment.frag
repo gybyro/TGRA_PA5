@@ -50,6 +50,9 @@ void main()
 
     // Texture color
     vec4 texColor = texture(imageTexture, fragmentTexCoord);
+    if (texColor.a <= 0.001) {
+        discard;
+    }
     vec3 baseColor = texColor.rgb;
 
     // Normalized normal from vertex shader

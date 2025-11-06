@@ -105,8 +105,10 @@ class GraphicsEngine:
             GLOBAL.ENTITY_TYPE["POINTLIGHT"]: CubeMesh(w= 0.2, d= 0.2, h= 0.2),
             GLOBAL.ENTITY_TYPE["MAXLIGHT"]: CubeMesh(w= 0.2, d= 0.2, h= 0.2),
         }
+
         if GLOBAL.ENTITY_TYPE.get("BILLBOARD") is not None:
             self.meshes[GLOBAL.ENTITY_TYPE["BILLBOARD"]] = RectMesh(w=4.60, h=2.13)
+            
         # non obj meshes need to be bound to textures
         self.materials: dict[int, Material] = {
             GLOBAL.ENTITY_TYPE["GROUND"]: RepeatingMaterial("res/images/tile.png", texture_repeat=(GLOBAL.GRID_SIZE, GLOBAL.GRID_SIZE)),
