@@ -40,7 +40,7 @@ class GameLoop:
     
     def _set_up_timeline(self) -> None:
 
-        self.fps = 2    # to be 24fps
+        self.fps = 24    # to be 24fps
         self.frame_durr = 1.0 / self.fps
         self.current_frame = 0
         self.start_time = time.time()
@@ -51,7 +51,7 @@ class GameLoop:
         glfw.set_input_mode(
             self.window, 
             GLFW_CONSTANTS.GLFW_CURSOR, 
-            GLFW_CONSTANTS.GLFW_CURSOR_HIDDEN
+            GLFW_CONSTANTS.GLFW_CURSOR_NORMAL
         )
 
         self._keys = {}

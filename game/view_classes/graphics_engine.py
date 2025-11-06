@@ -119,12 +119,12 @@ class GraphicsEngine:
         # Skybox
         self.skybox_shader = create_shader("res/shaders/skybox.vert", "res/shaders/skybox.frag")
         skybox_faces = [
+            "res/images/skybox_front.png",
+            "res/images/skybox_bottom.png",
+            "res/images/skybox_left.png",
+            "res/images/skybox_right.png",
             "res/images/skybox_top.png",
-            "res/images/skybox_top.png",
-            "res/images/skybox_top.png",
-            "res/images/skybox_top.png",
-            "res/images/skybox_top.png",
-            "res/images/skybox_top.png",
+            "res/images/skybox_back.png",
         ]
         self.skybox = Skybox(self.skybox_shader, skybox_faces)
         
@@ -241,6 +241,16 @@ class GraphicsEngine:
                 light.strength
             )
 
+        
+        # draw skybox last
+        glDepthMask(GL_FALSE)
+        view = camera.get_view_transform().copy()
+        view[:3, 3] = 0.0
+        view[3, :3] = 0.0
+        view[3, 3] = 1.0
+        self.skybox.draw(view, self.projection_transform)
+        glDepthMask(GL_TRUE)
+
 
         glFlush()
 
@@ -250,5 +260,7 @@ class GraphicsEngine:
         for material in self.materials.values():
             material.destroy()
         glDeleteProgram(self.shader)
+        self.skybox.destroy()
+        glDeleteProgram(self.skybox_shader)
 
     

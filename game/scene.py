@@ -97,6 +97,8 @@ class Scene:
                     self.entities[entitt][0].update([self.frames[frame_no]])
 
 
+        # gently rotate the camera each frame so the skybox is visible
+        self.player.spin(np.array([0.0, 0.0, 1.0], dtype=np.float32))
         self.player.update()
 
     def move_player(self, d_pos: list[float]) -> None:
