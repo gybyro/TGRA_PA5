@@ -9,15 +9,14 @@ from game.model_classes.entity import Entity
 from game.model_classes.camera import Camera
 from game.view_classes.material import Material, RepeatingMaterial
 from game.model_classes.light import Light
-from game.view_classes.mesh import Mesh, RectMesh, ObjMesh, CubeMesh
-from game.view_classes.full_objmesh import CoolObjMesh
+from game.view_classes.mesh import Mesh, RectMesh, CubeMesh
+from game.view_classes.obj_mesh import CoolObjMesh
 from game.scene import Scene
-from game.view_classes.axis import AxisCross
-from game.view_classes.hitbox import Hitbox
 from OpenGL.GL.shaders import compileProgram,compileShader
 
+from game.view_classes.skybox import Skybox
+
 #####
-from game.model_classes.maze import Maze
 from game.model_classes.plane import Plane
 
 def create_shader(vertex_filepath: str, fragment_filepath: str) -> int:
@@ -38,23 +37,19 @@ def create_shader(vertex_filepath: str, fragment_filepath: str) -> int:
         compileShader(vertex_src, GL_VERTEX_SHADER),
         compileShader(fragment_src, GL_FRAGMENT_SHADER)
     )
-    
     return shader
 
 
 class GraphicsEngine:
 
-    # __slots__ = (
-    #     "scene",
-    #     "meshes", "materials", "shader", 
-    #     "uniform_locations", "light_locations")
-
-
     def __init__(self, scene: Scene):
         self.scene = scene
         
         ### initiate OpenGL
-        glClearColor(0.1, 0.2, 0.2, 1.0) # change screen background
+
+        # glClearColor(0.1, 0.2, 0.2, 1.0) # change screen background
+        glClearColor(0.6, 0.8, 1.0, 1.0) # #99CCFF - skyblue
+
         glEnable(GL_DEPTH_TEST)
         # glEnable(GL_CULL_FACE)
         # glCullFace(GL_BACK)
@@ -74,11 +69,14 @@ class GraphicsEngine:
 
         
 
-
         # set up the projection transform
+        self.current_fov = 45.0
         self.projection_transform = pyrr.matrix44.create_perspective_projection(
-            fovy = 45, aspect = GLOBAL.WIDTH/GLOBAL.HEIGHT,
-            near = 0.1, far = 100, dtype=np.float32
+            fovy = self.current_fov,
+            aspect = GLOBAL.WIDTH/GLOBAL.HEIGHT,
+            near = 0.1, 
+            far = 100, 
+            dtype=np.float32
         )
         # then send that over to the shader
         glUniformMatrix4fv(
@@ -91,45 +89,45 @@ class GraphicsEngine:
     
     def _create_assets(self) -> None:
 
-        obj_path = "res/3D_models/maxwell/maxwell.54d410c0.obj"
-        mtl_path = "res/3D_models/maxwell/maxwell.54d410c0.mtl"
-        self.test = CoolObjMesh(obj_path, mtl_path)
+        # this is a dict containing all the obj meshes, (each one has its own folder plz)
+        self.objects = [
+            CoolObjMesh(
+                "res/3D_models/maxwell/maxwell.54d410c0.obj", 
+                "res/3D_models/maxwell/maxwell.54d410c0.mtl"),
+        ]
 
-
+        # meshes that dont use objs
         self.meshes: dict[int, Mesh] = {
             GLOBAL.ENTITY_TYPE["GROUND"]: RectMesh(w = GLOBAL.GROUND_W, h = GLOBAL.GROUND_H),
             GLOBAL.ENTITY_TYPE["WALL"]: RectMesh(w = GLOBAL.GROUND_W / GLOBAL.GRID_SIZE, h = GLOBAL.WALL_H),
             GLOBAL.ENTITY_TYPE["3D_WALL"]: CubeMesh(w= GLOBAL.GROUND_W / GLOBAL.GRID_SIZE, d= GLOBAL.WALL_D, h= GLOBAL.WALL_H),
-            # GLOBAL.ENTITY_TYPE["MAXWELL"]: ObjMesh("res/3D_models/maxwell.obj"),
-            # GLOBAL.ENTITY_TYPE["CUBE"]: ObjMesh("res/3D_models/cube.obj"),
-            # GLOBAL.ENTITY_TYPE["POINTLIGHT"]: RectMesh(w= 1, h= 1),
             GLOBAL.ENTITY_TYPE["POINTLIGHT"]: CubeMesh(w= 0.2, d= 0.2, h= 0.2),
             GLOBAL.ENTITY_TYPE["MAXLIGHT"]: CubeMesh(w= 0.2, d= 0.2, h= 0.2),
         }
-
+        # non obj meshes need to be bound to textures
         self.materials: dict[int, Material] = {
             GLOBAL.ENTITY_TYPE["GROUND"]: RepeatingMaterial("res/images/tile.png", texture_repeat=(GLOBAL.GRID_SIZE, GLOBAL.GRID_SIZE)),
             GLOBAL.ENTITY_TYPE["WALL"]: Material("res/images/gojji_snek.png"),
             GLOBAL.ENTITY_TYPE["3D_WALL"]: Material("res/images/wood_albedo.png"),
-            # GLOBAL.ENTITY_TYPE["3D_WALL"]: Material("res/images/tile.png"),
-            # GLOBAL.ENTITY_TYPE["MAXWELL"] : Material("res/images/dingus_nowhiskers.png"),
-            # GLOBAL.ENTITY_TYPE["CUBE"]: Material("res/images/skybox.png"),
-            # GLOBAL.ENTITY_TYPE["POINTLIGHT"]: Material("res/images/light-bulb.png"),
             GLOBAL.ENTITY_TYPE["POINTLIGHT"]: Material("res/images/white.png"),
             GLOBAL.ENTITY_TYPE["MAXLIGHT"]: Material("res/images/skybox.png"),
         }
 
         self.shader_light = create_shader("res/shaders/vertex.vert", "res/shaders/fragment.frag")
         self.shader_normals = create_shader("res/shaders/vertex.vert", "res/shaders/normal_frag.frag")
-        #######
-        # self.axis_shader = create_shader("res/shaders/axis.vert", "res/shaders/axis.frag")
-        # self.axis_cross = AxisCross(length=0.5)
         
-        ############### create Hitboxes ###############
-        self.hitbox_shader = create_shader("res/shaders/wireframe.vert", "res/shaders/wireframe.frag")
-        self.hitboxes = self.scene.maze.wall_hitboxes
-        # self.hitboxes.append(Hitbox(*self.scene.entities[GLOBAL.ENTITY_TYPE["MAXWELL"]][0].get_aabb()))
-
+        # Skybox
+        self.skybox_shader = create_shader("res/shaders/skybox.vert", "res/shaders/skybox.frag")
+        skybox_faces = [
+            "res/images/skybox_top.png",
+            "res/images/skybox_top.png",
+            "res/images/skybox_top.png",
+            "res/images/skybox_top.png",
+            "res/images/skybox_top.png",
+            "res/images/skybox_top.png",
+        ]
+        self.skybox = Skybox(self.skybox_shader, skybox_faces)
+        
 
     def _get_uniform_locations(self) -> None:
         """Query and store the locations of shader uniforms"""
@@ -214,11 +212,13 @@ class GraphicsEngine:
                 mesh.draw()
 
         ######### draw obj meshes
-        glUniformMatrix4fv(
-            self.uniform_locations[GLOBAL.UNIFORM_TYPE["MODEL"]],
-            1, GL_FALSE, renderables[GLOBAL.ENTITY_TYPE["MAXWELL"]][0].get_model_transform()
-        )
-        self.test.draw()
+        for object in self.objects:
+
+            glUniformMatrix4fv(
+                self.uniform_locations[GLOBAL.UNIFORM_TYPE["MODEL"]],
+                1, GL_FALSE, renderables[GLOBAL.ENTITY_TYPE["MAXWELL"]][0].get_model_transform()
+            )
+            object.draw()
 
 
         ######### lighting
@@ -240,37 +240,6 @@ class GraphicsEngine:
                 self.light_locations[GLOBAL.UNIFORM_TYPE["LIGHT_STRENGTH"]][i], 
                 light.strength
             )
-
-        ############### Draw the axis crosshair ###############
-        # glUseProgram(self.axis_shader)
-        # glUniformMatrix4fv(glGetUniformLocation(self.axis_shader, "view"), 1, GL_FALSE, camera.get_view_transform())
-        # glUniformMatrix4fv(glGetUniformLocation(self.axis_shader, "projection"), 1, GL_FALSE, self.projection_transform)
-
-        # Position the axis a bit in front of the camera
-        # axis_pos = camera.position + camera.forwards * 1.0  # 1.0 units in front of camera
-        # self.axis_cross.draw(
-        #     shader=self.axis_shader,
-        #     position=axis_pos,
-        #     forwards=camera.forwards,
-        #     right=camera.right,
-        #     up=camera.up
-        # )
-
-        ############### Draw Hitboxes ###############
-
-
-        if GLOBAL.DEBUG_SHOW_HITBOX:
-            glUseProgram(self.hitbox_shader)
-            # for hb in self.scene.maze.wall_hitboxes:
-            #     hb.draw(self.hitbox_shader, camera.get_view_transform(), self.projection_transform, color=(1,0,0))
-
-            maxwell_hitbox = Hitbox(*self.scene.entities[GLOBAL.ENTITY_TYPE["MAXWELL"]][0].get_aabb())
-            maxwell_hitbox.draw(self.hitbox_shader, camera.get_view_transform(), self.projection_transform, color=(0,0,1))
-
-            for hb in self.hitboxes:
-                 hb.draw(self.hitbox_shader, camera.get_view_transform(), self.projection_transform, color=(1,0,0))
-           
-
 
 
         glFlush()

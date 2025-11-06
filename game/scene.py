@@ -3,7 +3,6 @@ import config as GLOBAL
 from game.model_classes.entity import Entity
 from game.model_classes.camera import Camera
 from game.model_classes.plane import Plane
-from game.model_classes.maze import Maze, Cell
 from game.model_classes.cube import Cube
 from game.model_classes.light import Light
 
@@ -11,16 +10,16 @@ from game.controller import Collision
 
 class Scene:
     """Manages all objects and coordinates their interactions."""
-    __slots__ = ("entities", "player", "maze")
+    # __slots__ = ("entities", "player", "maze")
 
     
     def __init__(self):
 
         ground = Plane(position=[0,0,-2], rotation=[0,-90,0], scale=[1,1,1])
 
-        self.maze = Maze(ground)
-        self.maze.generate_walls()
-        walls = self.maze.wall_entities
+        # self.maze = Maze(ground)
+        # self.maze.generate_walls()
+        # walls = self.maze.wall_entities
 
         # # put max in the correct cell
         max = Cube(position = [16,16,-1], rotation = [90,0,0], scale = [0.1, 0.1, 0.1])
@@ -66,27 +65,39 @@ class Scene:
             ],
         }
 
-        if not GLOBAL.DEBUG_FLAT_WALLS:
-            self.entities[GLOBAL.ENTITY_TYPE["3D_WALL"]] = walls
-        else:
-            self.entities[GLOBAL.ENTITY_TYPE["WALL"]] = walls
+        # if not GLOBAL.DEBUG_FLAT_WALLS:
+        #     self.entities[GLOBAL.ENTITY_TYPE["3D_WALL"]] = walls
+        # else:
+        #     self.entities[GLOBAL.ENTITY_TYPE["WALL"]] = walls
 
         self.player = Camera(
-            position = [0,-40,1],
-            rotation = [0, 0, 0],
-            maze= self.maze
+            position = [-5, 0, 1],
+            rotation = [0, 0, 0]
         )
 
+        self.frames = [
+            [16,16,-1],
+            [16,15,-1],
+            [16,14,-1],
+            [16,13,-1],
+            [16,12,-1],
+            [16,11,-1],
+            [16,10,-1],
+            [16,9,-1],
+            [16,8,-1],
+            [16,7,-1],
+        ]
 
-    def update(self, dt: float) -> None:
-        for entities in self.entities.values():
-            for entity in entities:
-                if entity.id == "bill":
-                    entity.update(dt, self.player.position)
-                else:
-                    entity.update(dt)
 
-        self.player.update(dt)
+    def update(self, frame_no) -> None:
+        """Takes in a number representing what frame it is on"""
+        for entitt in self.entities:
+            if entitt == GLOBAL.ENTITY_TYPE["MAXWELL"]:
+                if len(self.frames) > frame_no:
+                    self.entities[entitt][0].update([self.frames[frame_no]])
+
+
+        self.player.update()
 
     def move_player(self, d_pos: list[float]) -> None:
         """Move the player by the given amount in the (forwards, right, up) vectors.

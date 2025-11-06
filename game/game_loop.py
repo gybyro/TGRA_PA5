@@ -4,6 +4,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 import numpy as np
 import pyrr
+import time
 
 import config as GLOBAL
 from game.scene import Scene
@@ -14,7 +15,7 @@ from game.view_classes.graphics_engine import GraphicsEngine
 class GameLoop:
     def __init__(self):
         self._set_up_glfw()
-        self._set_up_timer()
+        self._set_up_timeline()
         self._set_up_input_systems()
 
         self.scene = Scene()
@@ -37,12 +38,12 @@ class GameLoop:
             GLOBAL.WIDTH, GLOBAL.HEIGHT, "DUNGEON", None, None)
         glfw.make_context_current(self.window)
     
-    def _set_up_timer(self) -> None:
+    def _set_up_timeline(self) -> None:
 
-        self.last_time = glfw.get_time()
-        self.current_time = 0
-        self.frames_rendered = 0
-        self.frametime = 0.0
+        self.fps = 2    # to be 24fps
+        self.frame_durr = 1.0 / self.fps
+        self.current_frame = 0
+        self.start_time = time.time()
 
     def _set_up_input_systems(self) -> None:
         """Configure the mouse and keyboard"""
@@ -89,14 +90,22 @@ class GameLoop:
 
             # self._handle_keys()
             # self._handle_mouse()
-            
-            glfw.poll_events()
 
-            self.scene.update(self.frametime / 16.67)
-            self.graph.render(self.scene.player, self.scene.entities)
+            glfw.poll_events() # for event handling
 
-            # timing
-            self._calculate_framerate()
+
+
+
+            # Render new frame every 0.0417 or 24 frames per second
+            elapsed = time.time() - self.start_time
+            target_frame = int(elapsed * self.fps)
+            glfw.set_window_title(self.window, f"frame: {self.current_frame}")
+
+            if target_frame > self.current_frame:
+                self.current_frame = target_frame
+
+                self.scene.update(self.current_frame)
+                self.graph.render(self.scene.player, self.scene.entities)
 
     
     ################################   CONTROL   ######################################
@@ -149,9 +158,9 @@ class GameLoop:
     #     return dist_sq < radius ** 2
 
 
-    def _calculate_framerate(self) -> None:
-        """ Render new frame every 0.0417 or 24 frames per second
-        """
+    # def _calculate_framerate(self) -> None:
+    #     """ Render new frame every 0.0417 or 24 frames per second
+    #     """
 
         # self.current_time = glfw.get_time()
         # delta = self.current_time - self.last_time

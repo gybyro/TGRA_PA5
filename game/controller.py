@@ -10,7 +10,6 @@ from game.model_classes.entity import Entity
 # from game.view_classes.graphics_engine import GraphicsEngine
 
 
-
 class Collision:
 
     @staticmethod

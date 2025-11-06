@@ -5,18 +5,18 @@ from game.model_classes.entity import Entity
 
 
 class Plane(Entity):
-    """The ground plane, uses rectangle mesh;;
-    """
+    """The ground plane, uses rectangle mesh"""
     __slots__ = ("position", "scale", "texture")
 
-    def __init__(self, position: list[float], rotation: list[float], scale: list[float], texture = ""):
+    def __init__(self, 
+                 position: list[float], 
+                 rotation: list[float], 
+                 scale: list[float], 
+                 texture = ""):
         super().__init__(position, rotation, scale)
+
         self.texture = texture
         self.id = "WALL"
-
-
-    def update(self, dt: float) -> None:
-        pass
 
 
     def get_aabb(self):

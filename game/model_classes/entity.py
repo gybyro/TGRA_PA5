@@ -25,11 +25,18 @@ class Entity:
 
         self.id = ""
 
-    def update(self, dt: float) -> None:
-        """For child classes
-            dt: framerate correction factor.
-        """
-        pass
+    def update(self,
+               new_pos: list[float] | None = None, 
+               new_rot: list[float] | None = None,
+               new_sca: list[float] | None = None
+               ) -> None:
+        """Takes in new stuffs and updates the entity"""
+
+        if new_pos: self.position = new_pos
+        if new_rot: self.rotation = new_rot
+        if new_sca: self.scale = new_sca
+
+
 
     def _get_rotations(self, model_transform):
 
@@ -62,7 +69,7 @@ class Entity:
 
 
     def get_model_transform(self) -> np.ndarray:
-        """Returns the entity's model to world transformation matrix."""
+        """Returns the entity's model to world transformation matrix"""
         
         model_transform = pyrr.matrix44.create_identity(dtype=np.float32)
 
@@ -87,12 +94,6 @@ class Entity:
         """ Returns a 3x3 normal matrix (inverse-transpose of the upper-left 3x3 of model matrix)
         for transforming normals from local to world space.
         """
-        # model_transform = pyrr.matrix44.create_identity(dtype=np.float32)
-        # normal_matrix = self._get_rotations(model_transform)
-
-        # # normal_matrix = np.linalg.inv(model[:3,:3]).T
-        # return normal_matrix.astype(np.float32)
-
         model = self.get_model_transform()       # 4x4 model matrix
         normal_matrix = np.linalg.inv(model[:3,:3]).T
         return normal_matrix.astype(np.float32)

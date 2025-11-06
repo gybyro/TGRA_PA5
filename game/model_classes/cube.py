@@ -12,18 +12,7 @@ class Cube(Entity):
     def __init__(self, position: list[float], rotation: list[float], scale: list[float]):
         super().__init__(position, rotation, scale)
         self.id = "MAXWELL"
-    
-    def update(self, dt: float) -> None:
-
-        self.rotation[2] -= 2 * dt # dt: framerate correction factor.
         
-        if self.rotation[2] > 360:
-            self.rotation[2] += 360
-
-        if self.position[2] > 0.5:
-            self.position[2] -= 0.001
-
-        # self.position[2] = 2 # hard coding the z constraint
 
     def get_aabb(self):
 
