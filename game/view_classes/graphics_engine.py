@@ -6,8 +6,9 @@ import pyrr
 
 import config as GLOBAL
 from game.model_classes.entity import Entity
+from game.model_classes.billboard import Billboard
 from game.model_classes.camera import Camera
-from game.view_classes.material import Material, RepeatingMaterial
+from game.view_classes.material import Material, RepeatingMaterial, ImageSequenceMaterial
 from game.model_classes.light import Light
 from game.view_classes.mesh import Mesh, RectMesh, CubeMesh
 from game.view_classes.obj_mesh import CoolObjMesh
@@ -104,6 +105,8 @@ class GraphicsEngine:
             GLOBAL.ENTITY_TYPE["POINTLIGHT"]: CubeMesh(w= 0.2, d= 0.2, h= 0.2),
             GLOBAL.ENTITY_TYPE["MAXLIGHT"]: CubeMesh(w= 0.2, d= 0.2, h= 0.2),
         }
+        if GLOBAL.ENTITY_TYPE.get("BILLBOARD") is not None:
+            self.meshes[GLOBAL.ENTITY_TYPE["BILLBOARD"]] = RectMesh(w=4.60, h=2.13)
         # non obj meshes need to be bound to textures
         self.materials: dict[int, Material] = {
             GLOBAL.ENTITY_TYPE["GROUND"]: RepeatingMaterial("res/images/tile.png", texture_repeat=(GLOBAL.GRID_SIZE, GLOBAL.GRID_SIZE)),
@@ -112,6 +115,14 @@ class GraphicsEngine:
             GLOBAL.ENTITY_TYPE["POINTLIGHT"]: Material("res/images/white.png"),
             GLOBAL.ENTITY_TYPE["MAXLIGHT"]: Material("res/images/skybox.png"),
         }
+
+        billboard_type = GLOBAL.ENTITY_TYPE.get("BILLBOARD")
+        if billboard_type is not None:
+            sequence_info = getattr(self.scene, "animation_sequences", {}).get(billboard_type, {})
+            sequence_paths = sequence_info.get("paths", ("res/images/white.png",))
+            frame_rate = sequence_info.get("frame_rate", 1.0)
+            self.materials[billboard_type] = ImageSequenceMaterial(sequence_paths, frame_rate=frame_rate)
+
 
         self.shader_light = create_shader("res/shaders/vertex.vert", "res/shaders/fragment.frag")
         self.shader_normals = create_shader("res/shaders/vertex.vert", "res/shaders/normal_frag.frag")
@@ -190,7 +201,7 @@ class GraphicsEngine:
             mesh = self.meshes[entity_type]
             material = self.materials[entity_type]
             mesh.arm_for_drawing()
-            material.use() # bind material and texture
+            # material.use() # bind material and texture
 
             # set texture repeat for this material type
             tex_repeat_loc = glGetUniformLocation(self.shader, "uTexRepeat")
@@ -200,6 +211,16 @@ class GraphicsEngine:
                 glUniform2f(tex_repeat_loc, 1.0, 1.0)
 
             for entity in entities:
+
+                if isinstance(entity, Billboard):
+                    entity.update(camera.position)
+
+                if isinstance(material, ImageSequenceMaterial):
+                    frame_index = getattr(entity, "current_frame", None)
+                    material.use(frame_index)
+                else:
+                    material.use()  # bind material and texture
+
                 glUniformMatrix4fv(
                     self.uniform_locations[GLOBAL.UNIFORM_TYPE["MODEL"]],
                     1, GL_FALSE, entity.get_model_transform()

@@ -102,9 +102,12 @@ class GameLoop:
             glfw.set_window_title(self.window, f"frame: {self.current_frame}")
 
             if target_frame > self.current_frame:
+                delta_frames = target_frame - self.current_frame
                 self.current_frame = target_frame
 
-                self.scene.update(self.current_frame)
+                delta_time = delta_frames / self.fps if self.fps > 0 else 0.0
+
+                self.scene.update(self.current_frame, delta_time)
                 self.graph.render(self.scene.player, self.scene.entities)
 
     

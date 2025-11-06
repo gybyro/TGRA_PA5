@@ -37,7 +37,8 @@ ENTITY_TYPE = {
     "3D_WALL": 4,
     "MAXWELL": 5,
     "WHISK": 6,
-    "MAXLIGHT": 7
+    "MAXLIGHT": 7,
+    "BILLBOARD": 8,
 }
 
 UNIFORM_TYPE = {

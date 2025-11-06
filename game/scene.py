@@ -5,6 +5,7 @@ from game.model_classes.camera import Camera
 from game.model_classes.plane import Plane
 from game.model_classes.cube import Cube
 from game.model_classes.light import Light
+from game.model_classes.billboard import AnimatedBillboard
 
 from game.controller import Collision
 
@@ -26,6 +27,25 @@ class Scene:
         # cx, cy = self.maze.get_player_cell(max.position)
         # self.maze.cells[cy * GLOBAL.GRID_SIZE + cx].entities.append(max)
 
+        billboard_sequence = (
+            "res/images/animation_test/fleeting_1.png",
+            "res/images/animation_test/fleeting_2.png",
+            "res/images/animation_test/fleeting_3.png",
+            "res/images/animation_test/fleeting_4.png",
+            "res/images/animation_test/fleeting_5.png",
+            "res/images/animation_test/fleeting_6.png",
+            "res/images/animation_test/fleeting_7.png",
+            "res/images/animation_test/fleeting_8.png",
+            "res/images/animation_test/fleeting_9.png",
+        )
+        billboard_frame_rate = 9.0
+
+        self.animation_sequences: dict[int, dict[str, object]] = {
+            GLOBAL.ENTITY_TYPE["BILLBOARD"]: {
+                "paths": billboard_sequence,
+                "frame_rate": billboard_frame_rate,
+            }
+        }
 
 
         self.entities: dict[int, list[Entity]] = {
@@ -63,6 +83,14 @@ class Scene:
                     strength = 20)
                 for _ in range(8)
             ],
+            GLOBAL.ENTITY_TYPE["BILLBOARD"]: [
+                AnimatedBillboard(
+                    position=[12, 12, 1.5],
+                    scale=[1.0, 4.0, 4.0],
+                    texture_paths=billboard_sequence,
+                    frame_rate=billboard_frame_rate,
+                )
+            ],
         }
 
         # if not GLOBAL.DEBUG_FLAT_WALLS:
@@ -89,7 +117,7 @@ class Scene:
         ]
 
 
-    def update(self, frame_no) -> None:
+    def update(self, frame_no: int, delta_time: float) -> None:
         """Takes in a number representing what frame it is on"""
         for entitt in self.entities:
             if entitt == GLOBAL.ENTITY_TYPE["MAXWELL"]:
@@ -99,7 +127,14 @@ class Scene:
 
         # gently rotate the camera each frame so the skybox is visible
         self.player.spin(np.array([0.0, 0.0, 1.0], dtype=np.float32))
+
+
         self.player.update()
+
+        if delta_time > 0.0:
+            for entity in self.entities.get(GLOBAL.ENTITY_TYPE["BILLBOARD"], []):
+                if isinstance(entity, AnimatedBillboard):
+                    entity.advance(delta_time)
 
     def move_player(self, d_pos: list[float]) -> None:
         """Move the player by the given amount in the (forwards, right, up) vectors.
