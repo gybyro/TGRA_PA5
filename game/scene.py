@@ -126,7 +126,7 @@ class Scene:
 
 
         # gently rotate the camera each frame so the skybox is visible
-        self.player.spin(np.array([0.0, 0.0, 1.0], dtype=np.float32))
+        # self.player.spin(np.array([0.0, 0.0, 1.0], dtype=np.float32))
 
 
         self.player.update()

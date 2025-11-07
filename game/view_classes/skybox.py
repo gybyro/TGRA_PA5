@@ -16,62 +16,63 @@ class Skybox:
     def __init__(self, shader: int, face_paths: Union[str, Sequence[str]]):
         self.shader = shader
         self.vertex_count = 36
-        self._create_buffers()
+        self._create_buffers(1.0, 1.0, 1.0)
         self._load_cubemap(face_paths)
 
-    def _create_buffers(self) -> None:
-        # The cube is centered at the origin with unit-length faces. Each block
-        # of six vertices below forms two triangles for a single cubemap face.
+    def _create_buffers(self, w, d, h) -> None:
 
+        # position: x, y, z,      normal: x, y, z,
+        vertices = (
+             # Front face (+Y)
+            -w/2,  d/2, -h/2,     0, -1, 0,
+             w/2,  d/2, -h/2,     0, -1, 0,
+             w/2,  d/2,  h/2,     0, -1, 0,
+             w/2,  d/2,  h/2,     0, -1, 0,
+            -w/2,  d/2,  h/2,     0, -1, 0,
+            -w/2,  d/2, -h/2,     0, -1, 0,
 
+            # Back face (-Y)
+            -w/2, -d/2,  h/2,     0, 1, 0,
+             w/2, -d/2,  h/2,     0, 1, 0,
+             w/2, -d/2, -h/2,     0, 1, 0,
+             w/2, -d/2, -h/2,     0, 1, 0,
+            -w/2, -d/2, -h/2,     0, 1, 0,
+            -w/2, -d/2,  h/2,     0, 1, 0,
 
-        vertices = np.array(
-            (
+            # Left face (-X)
+            -w/2, -d/2, -h/2,     1, 0, 0,
+            -w/2, -d/2,  h/2,     1, 0, 0,
+            -w/2,  d/2,  h/2,     1, 0, 0,
+            -w/2,  d/2,  h/2,     1, 0, 0,
+            -w/2,  d/2, -h/2,     1, 0, 0,
+            -w/2, -d/2, -h/2,     1, 0, 0,
 
-                -0.5, -0.5,  -0.5,
-                -0.5,  0.5,  -0.5,
-                 0.5, -0.5,  -0.5,
-                -0.5,  0.5,  -0.5,
-                 0.5,  0.5,  -0.5,
-                 0.5, -0.5,  -0.5,
+            # Right face (+X)
+             w/2, -d/2,  h/2,     -1, 0, 0,
+             w/2, -d/2, -h/2,     -1, 0, 0,
+             w/2,  d/2, -h/2,     -1, 0, 0,
+             w/2,  d/2, -h/2,     -1, 0, 0,
+             w/2,  d/2,  h/2,     -1, 0, 0,
+             w/2, -d/2,  h/2,     -1, 0, 0,
 
-                -0.5, -0.5,   0.5,
-                 0.5, -0.5,   0.5,
-                -0.5,  0.5,   0.5,
-                -0.5,  0.5,   0.5,
-                 0.5, -0.5,   0.5,
-                 0.5,  0.5,   0.5,
+            # Top face (+Z)
+            -w/2, -d/2,  h/2,     0, 0, -1,
+             w/2, -d/2,  h/2,     0, 0, -1,
+             w/2,  d/2,  h/2,     0, 0, -1,
+             w/2,  d/2,  h/2,     0, 0, -1,
+            -w/2,  d/2,  h/2,     0, 0, -1,
+            -w/2, -d/2,  h/2,     0, 0, -1,
 
-                -0.5,   0.5, -0.5,
-                -0.5,   0.5,  0.5,
-                 0.5,   0.5, -0.5,
-                -0.5,   0.5,  0.5,
-                 0.5,   0.5,  0.5,
-                 0.5,   0.5, -0.5,
-
-                -0.5,  -0.5, -0.5,
-                 0.5,  -0.5, -0.5,
-                -0.5,  -0.5,  0.5,
-                -0.5,  -0.5,  0.5,
-                 0.5,  -0.5, -0.5,
-                 0.5,  -0.5,  0.5,
-
-                -0.5,  -0.5, -0.5,
-                -0.5,  -0.5,  0.5,
-                -0.5,   0.5, -0.5,
-                -0.5,  -0.5,  0.5,
-                -0.5,   0.5,  0.5,
-                -0.5,   0.5, -0.5,
-
-                 0.5,  -0.5, -0.5,
-                 0.5,   0.5, -0.5,
-                 0.5,  -0.5,  0.5,
-                 0.5,  -0.5,  0.5,
-                 0.5,   0.5, -0.5,
-                 0.5,   0.5,  0.5,
-            ),
-            dtype=np.float32,
+            # Bottom face (-Z)
+            -w/2,  d/2, -h/2,      0, 0, 1,
+             w/2,  d/2, -h/2,      0, 0, 1,
+             w/2, -d/2, -h/2,      0, 0, 1,
+             w/2, -d/2, -h/2,      0, 0, 1,
+            -w/2, -d/2, -h/2,      0, 0, 1,
+            -w/2,  d/2, -h/2,      0, 0, 1,
         )
+        vertices = np.array(vertices, dtype=np.float32)
+
 
         self.vao = glGenVertexArrays(1)
         self.vbo = glGenBuffers(1)
@@ -79,8 +80,14 @@ class Skybox:
         glBindVertexArray(self.vao)
         glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
         glBufferData(GL_ARRAY_BUFFER, vertices.nbytes, vertices, GL_STATIC_DRAW)
+
+        #position
         glEnableVertexAttribArray(0)
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, ctypes.c_void_p(0))
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 32, ctypes.c_void_p(0))
+        #normal
+        glEnableVertexAttribArray(1)
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 32, ctypes.c_void_p(12))
+
         glBindVertexArray(0)
 
     def _load_cubemap(self, face_paths: Union[str, Sequence[str]]) -> None:
@@ -122,7 +129,6 @@ class Skybox:
         for path in face_paths:
             with Image.open(path) as image:
                 loaded_faces.append(image.convert("RGBA").copy())
-
         return tuple(loaded_faces)
 
     def _load_cross_image(self, path: str) -> Tuple[Image.Image, ...]:
@@ -151,39 +157,19 @@ class Skybox:
         # positive X, negative X, positive Y, negative Y, positive Z, negative Z.
 
 
-        #
         # Convert the cross layout into the OpenGL cubemap order of
         # +X, -X, +Y, -Y, +Z, -Z.  Each face in the source image is oriented as
-        # if the cube were viewed from the outside, so several of the tiles need
-        # to be rotated to line the edges up when sampling from inside the cube.
         faces = {
-            "right": crop_face(2, 1),
             "left": crop_face(0, 1),
             "front": crop_face(1, 1),
+            "right": crop_face(2, 1),
             "back": crop_face(3, 1),
+
             "top": crop_face(1, 0),
             "bottom": crop_face(1, 2),
         }
 
-        rotations = {
-            "right": Image.ROTATE_90,
-            "left": Image.ROTATE_270,
-            "front": Image.ROTATE_180,
-            # "back": Image.ROTATE_180,
-            "top": Image.ROTATE_180,
-            "bottom": Image.ROTATE_180,
-        }
 
-        ordered_faces = ("right", "left", "front", "back", "top", "bottom")
-        converted_faces = []
-        for face_name in ordered_faces:
-            face_image = faces[face_name]
-            rotation = rotations.get(face_name)
-            if rotation is not None:
-                face_image = face_image.transpose(rotation)
-            converted_faces.append(face_image)
-
-        return tuple(converted_faces)
 
 
     def draw(self, view: np.ndarray, projection: np.ndarray) -> None:
@@ -205,7 +191,12 @@ class Skybox:
         glBindVertexArray(0)
         glDepthFunc(GL_LESS)
 
+    # def draw(self) -> None:
+    #     """Draw the triangle"""
+    #     glDrawArrays(GL_TRIANGLES, 0, self.vertex_count)
+
     def destroy(self) -> None:
+        """Free any allocated memory"""
         glDeleteVertexArrays(1, (self.vao,))
         glDeleteBuffers(1, (self.vbo,))
         glDeleteTextures(1, (self.texture,))
