@@ -33,7 +33,6 @@ ENTITY_TYPE = {
     "CUBE": 0,
     "POINTLIGHT": 1,
     "GROUND": 2,
-    "WALL": 3,
     "3D_WALL": 4,
     "MAXWELL": 5,
     "WHISK": 6,

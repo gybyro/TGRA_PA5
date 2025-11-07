@@ -100,7 +100,6 @@ class GraphicsEngine:
         # meshes that dont use objs
         self.meshes: dict[int, Mesh] = {
             GLOBAL.ENTITY_TYPE["GROUND"]: RectMesh(w = GLOBAL.GROUND_W, h = GLOBAL.GROUND_H),
-            GLOBAL.ENTITY_TYPE["WALL"]: RectMesh(w = GLOBAL.GROUND_W / GLOBAL.GRID_SIZE, h = GLOBAL.WALL_H),
             GLOBAL.ENTITY_TYPE["3D_WALL"]: CubeMesh(w= GLOBAL.GROUND_W / GLOBAL.GRID_SIZE, d= GLOBAL.WALL_D, h= GLOBAL.WALL_H),
             GLOBAL.ENTITY_TYPE["POINTLIGHT"]: CubeMesh(w= 0.2, d= 0.2, h= 0.2),
             GLOBAL.ENTITY_TYPE["MAXLIGHT"]: CubeMesh(w= 0.2, d= 0.2, h= 0.2),
@@ -108,14 +107,13 @@ class GraphicsEngine:
 
         if GLOBAL.ENTITY_TYPE.get("BILLBOARD") is not None:
             self.meshes[GLOBAL.ENTITY_TYPE["BILLBOARD"]] = RectMesh(w=4.60, h=2.13)
-            
+
         # non obj meshes need to be bound to textures
         self.materials: dict[int, Material] = {
             GLOBAL.ENTITY_TYPE["GROUND"]: RepeatingMaterial("res/images/tile.png", texture_repeat=(GLOBAL.GRID_SIZE, GLOBAL.GRID_SIZE)),
-            GLOBAL.ENTITY_TYPE["WALL"]: Material("res/images/gojji_snek.png"),
             GLOBAL.ENTITY_TYPE["3D_WALL"]: Material("res/images/wood_albedo.png"),
             GLOBAL.ENTITY_TYPE["POINTLIGHT"]: Material("res/images/white.png"),
-            GLOBAL.ENTITY_TYPE["MAXLIGHT"]: Material("res/images/skybox.png"),
+            GLOBAL.ENTITY_TYPE["MAXLIGHT"]: Material("res/images/white.png"),
         }
 
         billboard_type = GLOBAL.ENTITY_TYPE.get("BILLBOARD")
@@ -131,15 +129,7 @@ class GraphicsEngine:
         
         # Skybox
         self.skybox_shader = create_shader("res/shaders/skybox.vert", "res/shaders/skybox.frag")
-        skybox_faces = [
-            "res/images/skybox_front.png",
-            "res/images/skybox_bottom.png",
-            "res/images/skybox_left.png",
-            "res/images/skybox_right.png",
-            "res/images/skybox_top.png",
-            "res/images/skybox_back.png",
-        ]
-        self.skybox = Skybox(self.skybox_shader, skybox_faces)
+        self.skybox = Skybox(self.skybox_shader, "res/images/cubemaps_skybox.png")
         
 
     def _get_uniform_locations(self) -> None:
