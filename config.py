@@ -11,6 +11,10 @@ DEBUG_NORMAL = False
 RES = WIDTH, HEIGHT = 1400, 800
 FPS = 60
 
+TEST_VIEWS = [
+    
+]
+
 ############################## Constants ######################################
 
 X = np.array([1,0,0], dtype=np.float32)

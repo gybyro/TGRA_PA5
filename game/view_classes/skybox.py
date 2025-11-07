@@ -149,14 +149,41 @@ class Skybox:
         #       [ ] [D] [ ] [ ]
         # where the faces map to the OpenGL cubemap order of
         # positive X, negative X, positive Y, negative Y, positive Z, negative Z.
-        return (
-            crop_face(2, 1),  # +X (right)
-            crop_face(0, 1),  # -X (left)
-            crop_face(1, 1),  # +Y (front)
-            crop_face(3, 1),  # -Y (back)
-            crop_face(1, 0),  # +Z (top)
-            crop_face(1, 2),  # -Z (bottom)
-        )
+
+
+        #
+        # Convert the cross layout into the OpenGL cubemap order of
+        # +X, -X, +Y, -Y, +Z, -Z.  Each face in the source image is oriented as
+        # if the cube were viewed from the outside, so several of the tiles need
+        # to be rotated to line the edges up when sampling from inside the cube.
+        faces = {
+            "right": crop_face(2, 1),
+            "left": crop_face(0, 1),
+            "front": crop_face(1, 1),
+            "back": crop_face(3, 1),
+            "top": crop_face(1, 0),
+            "bottom": crop_face(1, 2),
+        }
+
+        rotations = {
+            "right": Image.ROTATE_90,
+            "left": Image.ROTATE_270,
+            "front": Image.ROTATE_180,
+            # "back": Image.ROTATE_180,
+            "top": Image.ROTATE_180,
+            "bottom": Image.ROTATE_180,
+        }
+
+        ordered_faces = ("right", "left", "front", "back", "top", "bottom")
+        converted_faces = []
+        for face_name in ordered_faces:
+            face_image = faces[face_name]
+            rotation = rotations.get(face_name)
+            if rotation is not None:
+                face_image = face_image.transpose(rotation)
+            converted_faces.append(face_image)
+
+        return tuple(converted_faces)
 
 
     def draw(self, view: np.ndarray, projection: np.ndarray) -> None:

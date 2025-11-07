@@ -88,7 +88,7 @@ class GameLoop:
             if glfw.window_should_close(self.window) or self._keys.get(GLFW_CONSTANTS.GLFW_KEY_ESCAPE, False):
                 running = False
 
-            # self._handle_keys()
+            self._handle_keys()
             # self._handle_mouse()
 
             glfw.poll_events() # for event handling
@@ -112,29 +112,29 @@ class GameLoop:
 
     
     ################################   CONTROL   ######################################
-    # def _handle_keys(self) -> None:
+    def _handle_keys(self) -> None:
 
 
 
-    #     ############ Move Player ;;;
-    #     rate = 0.005*self.frametime
-    #     d_pos = np.zeros(3, dtype=np.float32)
+        ############ Move Player ;;;
+        # rate = 0.005*self.frametime
+        # d_pos = np.zeros(3, dtype=np.float32)
 
-    #     if self._keys.get(GLFW_CONSTANTS.GLFW_KEY_W, False):
-    #         d_pos += GLOBAL.X
-    #     if self._keys.get(GLFW_CONSTANTS.GLFW_KEY_A, False):
-    #         d_pos -= GLOBAL.Y
-    #     if self._keys.get(GLFW_CONSTANTS.GLFW_KEY_S, False):
-    #         d_pos -= GLOBAL.X
-    #     if self._keys.get(GLFW_CONSTANTS.GLFW_KEY_D, False):
-    #         d_pos += GLOBAL.Y
+        if self._keys.get(GLFW_CONSTANTS.GLFW_KEY_SPACE, False):
+            pass
+        # if self._keys.get(GLFW_CONSTANTS.GLFW_KEY_A, False):
+        #     d_pos -= GLOBAL.Y
+        # if self._keys.get(GLFW_CONSTANTS.GLFW_KEY_S, False):
+        #     d_pos -= GLOBAL.X
+        # if self._keys.get(GLFW_CONSTANTS.GLFW_KEY_D, False):
+        #     d_pos += GLOBAL.Y
 
-    #     length = pyrr.vector.length(d_pos)
-    #     if abs(length) < 0.00001:
-    #         return
+        # length = pyrr.vector.length(d_pos)
+        # if abs(length) < 0.00001:
+        #     return
 
-    #     d_pos = rate * d_pos / length
-    #     self.scene.move_player(d_pos)
+        # d_pos = rate * d_pos / length
+        # self.scene.move_player(d_pos)
 
         
 
