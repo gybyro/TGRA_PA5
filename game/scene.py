@@ -16,14 +16,14 @@ class Scene:
     
     def __init__(self):
 
-        ground = Plane(position=[0,0,-2], rotation=[0,-90,0], scale=[1,1,1])
+        ground = Plane(position=[0,-2,0], rotation=[0,0,0], scale=[1,1,1])
 
         # self.maze = Maze(ground)
         # self.maze.generate_walls()
         # walls = self.maze.wall_entities
 
         # # put max in the correct cell
-        max = Cube(position = [16,16,-1], rotation = [90,0,0], scale = [0.1, 0.1, 0.1])
+        max = Cube(position = [6,-1,6], rotation = [0,0,0], scale = [0.1, 0.1, 0.1])
         # cx, cy = self.maze.get_player_cell(max.position)
         # self.maze.cells[cy * GLOBAL.GRID_SIZE + cx].entities.append(max)
 
@@ -57,15 +57,15 @@ class Scene:
             # GLOBAL.ENTITY_TYPE["3D_WALL"]: walls,
 
             GLOBAL.ENTITY_TYPE["CUBE"]: [
-                Cube(position = [5,5,0], rotation = [0,0,0], scale = [1, 1, 1]),
+                Cube(position = [5,0,5], rotation = [0,0,0], scale = [1, 1, 1]),
             ],
             GLOBAL.ENTITY_TYPE["MAXWELL"]: [ max,
             ],
 
             GLOBAL.ENTITY_TYPE["MAXLIGHT"]: [ 
                 Light(
-                    position= [16,16,3],
-                    color= [0.9,0.8,1],
+                    position= [16,3,16],
+                    color= [0.9,1,1],
                     strength = 80
                 )
             ],
@@ -85,7 +85,7 @@ class Scene:
             ],
             GLOBAL.ENTITY_TYPE["BILLBOARD"]: [
                 AnimatedBillboard(
-                    position=[12, 12, 1.5],
+                    position=[12, 1.5, 12],
                     scale=[1.0, 4.0, 4.0],
                     texture_paths=billboard_sequence,
                     frame_rate=billboard_frame_rate,
@@ -99,34 +99,34 @@ class Scene:
         #     self.entities[GLOBAL.ENTITY_TYPE["WALL"]] = walls
 
         self.player = Camera(
-            position = [-5, 0, 1],
+            position = [-5, 1, 0],
             rotation = [0, 0, 0]
         )
 
-        self.frames = [
-            [16,16,-1],
-            [16,15,-1],
-            [16,14,-1],
-            [16,13,-1],
-            [16,12,-1],
-            [16,11,-1],
-            [16,10,-1],
-            [16,9,-1],
-            [16,8,-1],
-            [16,7,-1],
-        ]
+        # self.frames = [
+        #     [16,16,-1],
+        #     [16,15,-1],
+        #     [16,14,-1],
+        #     [16,13,-1],
+        #     [16,12,-1],
+        #     [16,11,-1],
+        #     [16,10,-1],
+        #     [16,9,-1],
+        #     [16,8,-1],
+        #     [16,7,-1],
+        # ]
 
 
     def update(self, frame_no: int, delta_time: float) -> None:
         """Takes in a number representing what frame it is on"""
-        for entitt in self.entities:
-            if entitt == GLOBAL.ENTITY_TYPE["MAXWELL"]:
-                if len(self.frames) > frame_no:
-                    self.entities[entitt][0].update([self.frames[frame_no]])
+        # for entitt in self.entities:
+        #     if entitt == GLOBAL.ENTITY_TYPE["MAXWELL"]:
+        #         if len(self.frames) > frame_no:
+        #             self.entities[entitt][0].update([self.frames[frame_no]])
 
 
         # gently rotate the camera each frame so the skybox is visible
-        # self.player.spin(np.array([0.0, 0.0, 1.0], dtype=np.float32))
+        # self.player.spin(np.array([0.0, 1.0, 0.0], dtype=np.float32))
 
 
         self.player.update()
@@ -137,7 +137,7 @@ class Scene:
                     entity.advance(delta_time)
 
     def move_player(self, d_pos: list[float]) -> None:
-        """Move the player by the given amount in the (forwards, right, up) vectors.
+        """Move the player by the given amount in the (right, up, forwards) vectors.
         """
 
         # get list of collidable objects close to the player
@@ -145,11 +145,11 @@ class Scene:
 
         # proposed new position
         new_pos = self.player.position + (
-            d_pos[0] * self.player.forwards +
-            d_pos[1] * self.player.right +
-            d_pos[2] * self.player.up
+            d_pos[0] * self.player.right +
+            d_pos[1] * self.player.up +
+            d_pos[2] * self.player.forwards
         )
-        cell_x, cell_y = self.maze.get_player_cell(new_pos) # Find which maze cell the player is in
+        # cell_x, cell_y = self.maze.get_player_cell(new_pos) # Find which maze cell the player is in
 
         # for print vvv which cell you in
         # ol_x, ol_y = self.maze.get_player_cell(self.player.position) # earlier player cell
@@ -157,12 +157,12 @@ class Scene:
         #     print(f"Cell: {cell_x}, {cell_y}")
 
         # Get nearby cells (1 cell radius is fine)
-        cells = self.maze.get_nearby_cells(cell_x, cell_y)
-        for cel in cells:
-            collidables.extend(cel.walls)
+        # cells = self.maze.get_nearby_cells(cell_x, cell_y)
+        # for cel in cells:
+        #     collidables.extend(cel.walls)
             # collidables.extend(cel.entities) # add the things that are in that cell
 
-        collidables.append(self.entities[GLOBAL.ENTITY_TYPE["MAXWELL"]][0])
+        # collidables.append(self.entities[GLOBAL.ENTITY_TYPE["MAXWELL"]][0])
 
         if GLOBAL.DEBUG_COLLISION:
             # for coll in collidables:

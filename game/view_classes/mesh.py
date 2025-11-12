@@ -22,7 +22,7 @@ class Mesh:
         #position
         glEnableVertexAttribArray(0)
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 32, ctypes.c_void_p(0))
-        #texture
+        #texture / uv's
         glEnableVertexAttribArray(1)
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 32, ctypes.c_void_p(12))
         #normal
@@ -43,6 +43,32 @@ class Mesh:
         glDeleteBuffers(1,(self.vbo,))
 
 
+class GroundMesh(Mesh):
+    """A mesh which constructs its vertices to represent a rectangle"""
+    __slots__ = tuple()
+
+
+    def __init__(self, w: float, h: float):
+        """Initialize the rectangle mesh to the given
+            width and height.
+        """
+        super().__init__()
+
+        # position: x, y, z,    uv: s(0:L, 1:R), t(0:T, 1:B)   normal: x, y, z,
+        vertices = (
+            -w/2, 0,  h/2,  0, 0,  0, 1, 0,
+            -w/2, 0, -h/2,  0, 1,  0, 1, 0,
+             w/2, 0, -h/2,  1, 1,  0, 1, 0,
+
+            -w/2, 0,  h/2,  0, 0,  0, 1, 0,
+             w/2, 0, -h/2,  1, 1,  0, 1, 0,
+             w/2, 0,  h/2,  1, 0,  0, 1, 0
+        )
+        vertices = np.array(vertices, dtype=np.float32)
+        self.vertex_count = 6
+        
+        glBufferData(GL_ARRAY_BUFFER, vertices.nbytes, vertices, GL_STATIC_DRAW)
+
 
 
 class RectMesh(Mesh):
@@ -56,15 +82,15 @@ class RectMesh(Mesh):
         """
         super().__init__()
 
-        # position: x, y, z,    texture: s(0:L, 1:R), t(0:T, 1:B)   normal: x, y, z,
+        # position: x, y, z,    uv: s(0:L, 1:R), t(0:T, 1:B)   normal: x, y, z,
         vertices = (
-            0, -w/2,  h/2, 0, 0, 1, 0, 0,
-            0, -w/2, -h/2, 0, 1, 1, 0, 0,
-            0,  w/2, -h/2, 1, 1, 1, 0, 0,
+            -w/2,  h/2, 0,  0, 0,  1, 0, 0,
+            -w/2, -h/2, 0,  0, 1,  1, 0, 0,
+             w/2, -h/2, 0,  1, 1,  1, 0, 0,
 
-            0, -w/2,  h/2, 0, 0, 1, 0, 0,
-            0,  w/2, -h/2, 1, 1, 1, 0, 0,
-            0,  w/2,  h/2, 1, 0, 1, 0, 0
+            -w/2,  h/2, 0,  0, 0,  1, 0, 0,
+             w/2, -h/2, 0,  1, 1,  1, 0, 0,
+             w/2,  h/2, 0,  1, 0,  1, 0, 0
         )
         vertices = np.array(vertices, dtype=np.float32)
         self.vertex_count = 6
@@ -73,58 +99,59 @@ class RectMesh(Mesh):
 
 class CubeMesh(Mesh):
 
-    def __init__(self, w: float, d: float, h: float):
+    def __init__(self, w: float, h: float, d: float):
         super().__init__()
 
         # position: x, y, z,    texture: s(0:L, 1:R), t(0:T, 1:B)   normal: x, y, z,
         vertices = (
-             # Front face (+Y)
-            -w/2,  d/2, -h/2,  0, 0,   0, 1, 0,
-             w/2,  d/2, -h/2,  1, 0,   0, 1, 0,
-             w/2,  d/2,  h/2,  1, 1,   0, 1, 0,
-             w/2,  d/2,  h/2,  1, 1,   0, 1, 0,
-            -w/2,  d/2,  h/2,  0, 1,   0, 1, 0,
-            -w/2,  d/2, -h/2,  0, 0,   0, 1, 0,
-
-            # Back face (-Y)
-            -w/2, -d/2,  h/2,  0, 0,   0, -1, 0,
-             w/2, -d/2,  h/2,  1, 0,   0, -1, 0,
-             w/2, -d/2, -h/2,  1, 1,   0, -1, 0,
-             w/2, -d/2, -h/2,  1, 1,   0, -1, 0,
-            -w/2, -d/2, -h/2,  0, 1,   0, -1, 0,
-            -w/2, -d/2,  h/2,  0, 0,   0, -1, 0,
-
-            # Left face (-X)
-            -w/2, -d/2, -h/2,  0, 0,  -1, 0, 0,
-            -w/2, -d/2,  h/2,  1, 0,  -1, 0, 0,
-            -w/2,  d/2,  h/2,  1, 1,  -1, 0, 0,
-            -w/2,  d/2,  h/2,  1, 1,  -1, 0, 0,
-            -w/2,  d/2, -h/2,  0, 1,  -1, 0, 0,
-            -w/2, -d/2, -h/2,  0, 0,  -1, 0, 0,
 
             # Right face (+X)
-             w/2, -d/2,  h/2,  0, 0,   1, 0, 0,
-             w/2, -d/2, -h/2,  1, 0,   1, 0, 0,
-             w/2,  d/2, -h/2,  1, 1,   1, 0, 0,
-             w/2,  d/2, -h/2,  1, 1,   1, 0, 0,
-             w/2,  d/2,  h/2,  0, 1,   1, 0, 0,
-             w/2, -d/2,  h/2,  0, 0,   1, 0, 0,
+             w/2, -h/2,  d/2,  0, 0,   1, 0, 0,
+             w/2, -h/2, -d/2,  1, 0,   1, 0, 0,
+             w/2,  h/2, -d/2,  1, 1,   1, 0, 0,
+             w/2,  h/2, -d/2,  1, 1,   1, 0, 0,
+             w/2,  h/2,  d/2,  0, 1,   1, 0, 0,
+             w/2, -h/2,  d/2,  0, 0,   1, 0, 0,
 
-            # Top face (+Z)
-            -w/2, -d/2,  h/2,  0, 0,   0, 0, 1,
-             w/2, -d/2,  h/2,  1, 0,   0, 0, 1,
-             w/2,  d/2,  h/2,  1, 1,   0, 0, 1,
-             w/2,  d/2,  h/2,  1, 1,   0, 0, 1,
-            -w/2,  d/2,  h/2,  0, 1,   0, 0, 1,
-            -w/2, -d/2,  h/2,  0, 0,   0, 0, 1,
+            # Left face (-X)
+            -w/2, -h/2, -d/2,  0, 0,  -1, 0, 0,
+            -w/2, -h/2,  d/2,  1, 0,  -1, 0, 0,
+            -w/2,  h/2,  d/2,  1, 1,  -1, 0, 0,
+            -w/2,  h/2,  d/2,  1, 1,  -1, 0, 0,
+            -w/2,  h/2, -d/2,  0, 1,  -1, 0, 0,
+            -w/2, -h/2, -d/2,  0, 0,  -1, 0, 0,
 
-            # Bottom face (-Z)
-            -w/2,  d/2, -h/2,  0, 0,   0, 0, -1,
-             w/2,  d/2, -h/2,  1, 0,   0, 0, -1,
-             w/2, -d/2, -h/2,  1, 1,   0, 0, -1,
-             w/2, -d/2, -h/2,  1, 1,   0, 0, -1,
-            -w/2, -d/2, -h/2,  0, 1,   0, 0, -1,
-            -w/2,  d/2, -h/2,  0, 0,   0, 0, -1,
+            # Top face (+Y)
+            -w/2,  h/2, -d/2,  0, 0,   0, 1, 0,
+             w/2,  h/2, -d/2,  1, 0,   0, 1, 0,
+             w/2,  h/2,  d/2,  1, 1,   0, 1, 0,
+             w/2,  h/2,  d/2,  1, 1,   0, 1, 0,
+            -w/2,  h/2,  d/2,  0, 1,   0, 1, 0,
+            -w/2,  h/2, -d/2,  0, 0,   0, 1, 0,
+
+            # Bottom face (-Y)
+            -w/2, -h/2,  d/2,  0, 0,   0, -1, 0,
+             w/2, -h/2,  d/2,  1, 0,   0, -1, 0,
+             w/2, -h/2, -d/2,  1, 1,   0, -1, 0,
+             w/2, -h/2, -d/2,  1, 1,   0, -1, 0,
+            -w/2, -h/2, -d/2,  0, 1,   0, -1, 0,
+            -w/2, -h/2,  d/2,  0, 0,   0, -1, 0,
+            
+            # Front face (+Z)
+            -w/2, -h/2,  d/2,  0, 0,   0, 0, 1,
+             w/2, -h/2,  d/2,  1, 0,   0, 0, 1,
+             w/2,  h/2,  d/2,  1, 1,   0, 0, 1,
+             w/2,  h/2,  d/2,  1, 1,   0, 0, 1,
+            -w/2,  h/2,  d/2,  0, 1,   0, 0, 1,
+            -w/2, -h/2,  d/2,  0, 0,   0, 0, 1,
+
+            # Back face (-Z)
+            -w/2,  h/2, -d/2,  0, 0,   0, 0, -1,
+             w/2,  h/2, -d/2,  1, 0,   0, 0, -1,
+             w/2, -h/2, -d/2,  1, 1,   0, 0, -1,
+             w/2, -h/2, -d/2,  1, 1,   0, 0, -1,
+            -w/2, -h/2, -d/2,  0, 1,   0, 0, -1,
+            -w/2,  h/2, -d/2,  0, 0,   0, 0, -1,
         )
         vertices = np.array(vertices, dtype=np.float32)
         self.vertex_count = 36

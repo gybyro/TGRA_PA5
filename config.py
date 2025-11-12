@@ -12,14 +12,14 @@ RES = WIDTH, HEIGHT = 1400, 800
 FPS = 60
 
 TEST_VIEWS = [
-    
+
 ]
 
 ############################## Constants ######################################
 
-X = np.array([1,0,0], dtype=np.float32)
-Y = np.array([0,1,0], dtype=np.float32)
-Z = np.array([0,0,1], dtype=np.float32)
+X = np.array([1,0,0], dtype=np.float32) # right - left
+Y = np.array([0,1,0], dtype=np.float32) # top - bottom
+Z = np.array([0,0,1], dtype=np.float32) # front - back
 
 GROUND_W = 50 # world units I think
 GROUND_H = 50

@@ -23,7 +23,7 @@ class Plane(Entity):
 
         # half extents
         # hx, hy, hz = 0, self.scale[1] * 2, self.scale[2] * 2
-        hx, hy, hz = (GLOBAL.GROUND_W / GLOBAL.GRID_SIZE) /2, GLOBAL.WALL_D /2, GLOBAL.WALL_H /2
+        hx, hy, hz = (GLOBAL.GROUND_W / GLOBAL.GRID_SIZE) /2, GLOBAL.WALL_H /2, GLOBAL.WALL_D /2
 
         # world position
         cx, cy, cz = self.position

@@ -8,37 +8,39 @@ from game.model_classes.entity import Entity
 class Camera(Entity):
     """First person camera -ish"""
 
-    # __slots__ = ("forwards", "right", "up", "maze")
+    # __slots__ = ("forwards", "right", "up")
 
 
     def __init__(self, position: list[float], rotation):
         super().__init__(position, rotation) # inherits from Entity
 
         # re initialize the directionals in np.zeros
-        self.forwards = np.zeros(3, dtype=np.float32)
         self.right = np.zeros(3, dtype=np.float32)
         self.up = np.zeros(3, dtype=np.float32)
+        self.forwards = np.zeros(3, dtype=np.float32)
         self.update(0)
 
 
     def update(self, timeline_data: dict | None = None) -> None:
 
         # where we are looking in the horizontal plane (north, east, south, west)
-        theta = self.rotation[2]
+        theta = -self.rotation[2]
         # where we are looking vertically (up, down)
         phi = self.rotation[1]
 
         self.forwards = np.array(
             [
                 np.cos(np.deg2rad(theta)) * np.cos(np.deg2rad(phi)),
+                np.sin(np.deg2rad(phi)),
                 np.sin(np.deg2rad(theta)) * np.cos(np.deg2rad(phi)),
-                np.sin(np.deg2rad(phi))
             ],
             dtype = np.float32
         )
 
-        self.right = np.cross(self.forwards, GLOBAL.Z)
+        self.right = np.cross(self.forwards, GLOBAL.Y)
+        self.right /= np.linalg.norm(self.right)
         self.up = np.cross(self.right, self.forwards)
+        self.up /= np.linalg.norm(self.up)
 
         if timeline_data:
             self.apply_animation(timeline_data)
@@ -54,8 +56,6 @@ class Camera(Entity):
 
         
 
-
-
     def get_view_transform(self) -> np.ndarray:
         """Returns the camera's world to view transformation matrix.
         """
@@ -70,5 +70,6 @@ class Camera(Entity):
         self.rotation += d_eulers
 
         self.rotation[0] %= 360
-        self.rotation[1] = min(89, max(-89, self.rotation[1]))
+        self.rotation[1] %= 360
+        # rotation lock for gameplay # self.rotation[1] = min(89, max(-89, self.rotation[1]))
         self.rotation[2] %= 360

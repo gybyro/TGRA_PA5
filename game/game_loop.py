@@ -36,6 +36,10 @@ class GameLoop:
         glfw.window_hint(GLFW_CONSTANTS.GLFW_DOUBLEBUFFER,GL_FALSE) 
         self.window = glfw.create_window(
             GLOBAL.WIDTH, GLOBAL.HEIGHT, "DUNGEON", None, None)
+        
+        # antialiasing - not pixelated
+        glfw.window_hint(glfw.SAMPLES, 4)  # Request 4x MSAA
+
         glfw.make_context_current(self.window)
     
     def _set_up_timeline(self) -> None:
@@ -89,7 +93,7 @@ class GameLoop:
                 running = False
 
             self._handle_keys()
-            # self._handle_mouse()
+            self._handle_mouse()
 
             glfw.poll_events() # for event handling
 
@@ -138,17 +142,15 @@ class GameLoop:
 
         
 
-                        
+    def _handle_mouse(self) -> None:
 
-    # def _handle_mouse(self) -> None:
-
-    #     (x,y) = glfw.get_cursor_pos(self.window)
-    #     d_eulers = 0.05 * ((GLOBAL.WIDTH / 2) - x) * GLOBAL.Z
-    #     d_eulers += 0.05 * ((GLOBAL.HEIGHT / 2) - y) * GLOBAL.Y
-    #     self.scene.spin_player(d_eulers)
+        (x,y) = glfw.get_cursor_pos(self.window)
+        d_eulers = 0.05 * ((GLOBAL.WIDTH / 2) - x) * GLOBAL.Z
+        d_eulers += 0.05 * ((GLOBAL.HEIGHT / 2) - y) * GLOBAL.Y
+        self.scene.spin_player(d_eulers)
         
-    #     # Center the mouse
-    #     glfw.set_cursor_pos(self.window, GLOBAL.WIDTH / 2, GLOBAL.HEIGHT / 2)
+        # Center the mouse
+        glfw.set_cursor_pos(self.window, GLOBAL.WIDTH / 2, GLOBAL.HEIGHT / 2)
 
     ################################   COLLISION   ######################################
 

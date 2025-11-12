@@ -10,7 +10,7 @@ from game.model_classes.billboard import Billboard
 from game.model_classes.camera import Camera
 from game.view_classes.material import Material, RepeatingMaterial, ImageSequenceMaterial
 from game.model_classes.light import Light
-from game.view_classes.mesh import Mesh, RectMesh, CubeMesh
+from game.view_classes.mesh import Mesh, RectMesh, CubeMesh, GroundMesh
 from game.view_classes.obj_mesh import CoolObjMesh
 from game.scene import Scene
 from OpenGL.GL.shaders import compileProgram,compileShader
@@ -57,6 +57,9 @@ class GraphicsEngine:
         glEnable(GL_BLEND) # enable alpha transperancy 
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) # enable alpha transperancy 
 
+        # antialiasing - not pixelated
+        glEnable(GL_MULTISAMPLE)
+
         self._create_assets()
         
         ### Some shader data only needs to be set once.
@@ -99,8 +102,8 @@ class GraphicsEngine:
 
         # meshes that dont use objs
         self.meshes: dict[int, Mesh] = {
-            GLOBAL.ENTITY_TYPE["GROUND"]: RectMesh(w = GLOBAL.GROUND_W, h = GLOBAL.GROUND_H),
-            GLOBAL.ENTITY_TYPE["3D_WALL"]: CubeMesh(w= GLOBAL.GROUND_W / GLOBAL.GRID_SIZE, d= GLOBAL.WALL_D, h= GLOBAL.WALL_H),
+            GLOBAL.ENTITY_TYPE["GROUND"]: GroundMesh(w = GLOBAL.GROUND_W, h = GLOBAL.GROUND_H),
+            GLOBAL.ENTITY_TYPE["3D_WALL"]: CubeMesh(w= GLOBAL.GROUND_W / GLOBAL.GRID_SIZE, h= GLOBAL.WALL_D, d= GLOBAL.WALL_H),
             GLOBAL.ENTITY_TYPE["POINTLIGHT"]: CubeMesh(w= 0.2, d= 0.2, h= 0.2),
             GLOBAL.ENTITY_TYPE["MAXLIGHT"]: CubeMesh(w= 0.2, d= 0.2, h= 0.2),
         }
@@ -129,7 +132,7 @@ class GraphicsEngine:
         
         # Skybox
         self.skybox_shader = create_shader("res/shaders/skybox.vert", "res/shaders/skybox.frag")
-        self.skybox = Skybox(self.skybox_shader, "res/images/cubemaps_skybox.png")
+        self.skybox = Skybox(self.skybox_shader, "res/images/cubemap.png")
         
 
     def _get_uniform_locations(self) -> None:
