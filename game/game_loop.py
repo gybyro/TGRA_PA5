@@ -1,5 +1,6 @@
 import glfw
 import glfw.GLFW as GLFW_CONSTANTS
+from openal import oalInit, oalQuit, oalOpen, Listener
 from OpenGL.GL import *
 from OpenGL.GLU import *
 import numpy as np
@@ -41,6 +42,10 @@ class GameLoop:
         glfw.window_hint(glfw.SAMPLES, 4)  # Request 4x MSAA
 
         glfw.make_context_current(self.window)
+
+    def _set_up_openAl(self) -> None:
+        # Initialize OpenAL
+        oalInit()
     
     def _set_up_timeline(self) -> None:
 
@@ -179,6 +184,7 @@ class GameLoop:
 
     def quit(self) -> None:
         self.graph.destroy()
+        oalQuit()
         quit()
 
 

@@ -70,6 +70,6 @@ class Camera(Entity):
         self.rotation += d_eulers
 
         self.rotation[0] %= 360
-        self.rotation[1] %= 360
-        # rotation lock for gameplay # self.rotation[1] = min(89, max(-89, self.rotation[1]))
+        # rotation lock for gameplay # 
+        self.rotation[1] = min(89, max(-89, self.rotation[1]))
         self.rotation[2] %= 360

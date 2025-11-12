@@ -21,3 +21,4 @@ pip install glfw
 pip install PyOpenGL
 pip install pyrr
 pip install pillow
+pip install pyopenal

@@ -3,6 +3,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 import numpy as np
 import pyrr
+import time
 
 import config as GLOBAL
 from game.model_classes.entity import Entity
@@ -102,7 +103,7 @@ class GraphicsEngine:
 
         # meshes that dont use objs
         self.meshes: dict[int, Mesh] = {
-            GLOBAL.ENTITY_TYPE["GROUND"]: GroundMesh(w = GLOBAL.GROUND_W, h = GLOBAL.GROUND_H),
+            # GLOBAL.ENTITY_TYPE["GROUND"]: GroundMesh(w = GLOBAL.GROUND_W, h = GLOBAL.GROUND_H),
             GLOBAL.ENTITY_TYPE["3D_WALL"]: CubeMesh(w= GLOBAL.GROUND_W / GLOBAL.GRID_SIZE, h= GLOBAL.WALL_D, d= GLOBAL.WALL_H),
             GLOBAL.ENTITY_TYPE["POINTLIGHT"]: CubeMesh(w= 0.2, d= 0.2, h= 0.2),
             GLOBAL.ENTITY_TYPE["MAXLIGHT"]: CubeMesh(w= 0.2, d= 0.2, h= 0.2),
@@ -113,7 +114,7 @@ class GraphicsEngine:
 
         # non obj meshes need to be bound to textures
         self.materials: dict[int, Material] = {
-            GLOBAL.ENTITY_TYPE["GROUND"]: RepeatingMaterial("res/images/tile.png", texture_repeat=(GLOBAL.GRID_SIZE, GLOBAL.GRID_SIZE)),
+            # GLOBAL.ENTITY_TYPE["GROUND"]: RepeatingMaterial("res/images/tile.png", texture_repeat=(GLOBAL.GRID_SIZE, GLOBAL.GRID_SIZE)),
             GLOBAL.ENTITY_TYPE["3D_WALL"]: Material("res/images/wood_albedo.png"),
             GLOBAL.ENTITY_TYPE["POINTLIGHT"]: Material("res/images/white.png"),
             GLOBAL.ENTITY_TYPE["MAXLIGHT"]: Material("res/images/white.png"),
@@ -132,7 +133,12 @@ class GraphicsEngine:
         
         # Skybox
         self.skybox_shader = create_shader("res/shaders/skybox.vert", "res/shaders/skybox.frag")
-        self.skybox = Skybox(self.skybox_shader, "res/images/cubemap.png")
+        # self.skybox = Skybox(self.skybox_shader, "res/images/cubemap_EgyptDay.png")
+        self.skybox = Skybox(
+            self.skybox_shader,
+            "res/images/cubemap_sky_day.png",
+            "res/images/cubemap_sky_night.png"
+        )
         
 
     def _get_uniform_locations(self) -> None:
@@ -264,6 +270,9 @@ class GraphicsEngine:
         view[:3, 3] = 0.0
         view[3, :3] = 0.0
         view[3, 3] = 1.0
+
+        self.skybox.mix_value = (np.sin(time.time() * 0.2) * 0.5) + 0.5
+
         self.skybox.draw(view, self.projection_transform)
         glDepthMask(GL_TRUE)
 

@@ -17,6 +17,7 @@ def _load_texture(filepath: str) -> int:
 
     with Image.open(filepath, mode="r") as image:
         image_width, image_height = image.size
+        image = image.transpose(Image.FLIP_TOP_BOTTOM)
         image = image.convert("RGBA")
         img_data = bytes(image.tobytes())
         glTexImage2D(
@@ -30,6 +31,9 @@ def _load_texture(filepath: str) -> int:
             GL_UNSIGNED_BYTE,
             img_data,
         )
+
+        
+
     glGenerateMipmap(GL_TEXTURE_2D)
     return texture
 

@@ -11,19 +11,32 @@ from PIL import Image
 class Skybox:
     """Simple cube-map backed skybox renderer."""
 
-    __slots__ = ("shader", "texture", "vao", "vbo", "vertex_count")
+    __slots__ = (
+        "shader",
+        "vao",
+        "vbo",
+        "vertex_count",
+        "texture_a",
+        "texture_b",
+        "mix_value",
+    )
 
-    def __init__(self, shader: int, face_paths: Union[str, Sequence[str]]):
+    def __init__(self, shader: int, 
+                cubemap_path_a: Union[str, Sequence[str]],
+                cubemap_path_b: Union[str, Sequence[str]] | None = None,
+    ):
         self.shader = shader
         self.vertex_count = 36
+        self.mix_value = 0.0  # 0 = show A, 1 = show B
+
         self._create_buffers()
-        self._load_cubemap(face_paths)
+        self.texture_a = self._load_cubemap(cubemap_path_a)
+        self.texture_b = (self._load_cubemap(cubemap_path_b) if cubemap_path_b else self.texture_a)
+
 
     def _create_buffers(self) -> None:
-
-        w = 2
-        h = 2
-        d = 2
+        """ daaamn geometry """
+        w = h = d = 2
 
         # position: x, y, z,    texture: s(0:L, 1:R), t(0:T, 1:B)   normal: x, y, z,
         vertices = (
@@ -104,18 +117,17 @@ class Skybox:
         
 
 
-    def _load_cubemap(self, face_paths: Union[str, Sequence[str]]) -> None:
+    def _load_cubemap(self, face_paths: Union[str, Sequence[str]]) -> int:
         if isinstance(face_paths, (str, bytes)):
             cubemap_faces = self._load_cross_image(str(face_paths))
         else:
             cubemap_faces = self._load_face_images(face_paths)
 
-        self.texture = glGenTextures(1)
-        glBindTexture(GL_TEXTURE_CUBE_MAP, self.texture)
+        tex = glGenTextures(1)
+        glBindTexture(GL_TEXTURE_CUBE_MAP, tex)
 
         for index, face in enumerate(cubemap_faces):
             width, height = face.size
-            img_data = face.tobytes()
             glTexImage2D(
                 GL_TEXTURE_CUBE_MAP_POSITIVE_X + index,
                 0,
@@ -125,7 +137,7 @@ class Skybox:
                 0,
                 GL_RGBA,
                 GL_UNSIGNED_BYTE,
-                img_data,
+                face.tobytes(),
             )
 
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
@@ -134,17 +146,20 @@ class Skybox:
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE)
 
+        return tex
+
 
     def _load_face_images(self, face_paths: Sequence[str]) -> Tuple[Image.Image, ...]:
         if len(face_paths) != 6:
             raise ValueError("Skybox requires exactly six texture paths")
+        return tuple(Image.open(p).convert("RGBA").copy() for p in face_paths)
 
-        loaded_faces = []
-        for path in face_paths:
-            with Image.open(path) as image:
-                loaded_faces.append(image.convert("RGBA").copy())
+        # loaded_faces = []
+        # for path in face_paths:
+        #     with Image.open(path) as image:
+        #         loaded_faces.append(image.convert("RGBA").copy())
 
-        return tuple(loaded_faces)
+        # return tuple(loaded_faces)
     
 
     def _load_cross_image(self, path: str) -> Tuple[Image.Image, ...]:
@@ -183,20 +198,25 @@ class Skybox:
     def draw(self, view: np.ndarray, projection: np.ndarray) -> None:        
         glUseProgram(self.shader)        
         glUniformMatrix4fv(glGetUniformLocation(self.shader, "view"), 1, GL_FALSE, view)        
-        glUniformMatrix4fv(            glGetUniformLocation(self.shader, "projection"),            
-                           1,            
-                           GL_FALSE,            
-                           projection,        
-                           )        
-        glUniform1i(glGetUniformLocation(self.shader, "skybox"), 0)        
-        glDepthFunc(GL_LEQUAL)        
-        glBindVertexArray(self.vao)        
-        glActiveTexture(GL_TEXTURE0)        
-        glBindTexture(GL_TEXTURE_CUBE_MAP, self.texture)        
-        glDrawArrays(GL_TRIANGLES, 0, self.vertex_count)        
-        glBindVertexArray(0)        
-        glDepthFunc(GL_LESS)    
+        glUniformMatrix4fv(glGetUniformLocation(self.shader, "projection"), 1, GL_FALSE, projection)
+        glUniform1f(glGetUniformLocation(self.shader, "uMix"), self.mix_value)
+        glUniform1i(glGetUniformLocation(self.shader, "uSkyboxA"), 0)
+        glUniform1i(glGetUniformLocation(self.shader, "uSkyboxB"), 1)
+       
+        glDepthFunc(GL_LEQUAL)
+        glBindVertexArray(self.vao)
+
+        glActiveTexture(GL_TEXTURE0)
+        glBindTexture(GL_TEXTURE_CUBE_MAP, self.texture_a)
+        glActiveTexture(GL_TEXTURE1)
+        glBindTexture(GL_TEXTURE_CUBE_MAP, self.texture_b)
+
         
-    def destroy(self) -> None:        
-        glDeleteVertexArrays(1, (self.vao,))        
+        glDrawArrays(GL_TRIANGLES, 0, self.vertex_count)
+        glBindVertexArray(0)
+        glDepthFunc(GL_LESS)
+        
+    def destroy(self) -> None:
+        glDeleteVertexArrays(1, (self.vao,))
         glDeleteBuffers(1, (self.vbo,))
+        glDeleteTextures([self.texture_a, self.texture_b])
