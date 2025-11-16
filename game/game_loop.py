@@ -23,6 +23,8 @@ class GameLoop:
         self.frames = Frames()
         self.graph = GraphicsEngine(self.scene)
 
+        self.pressed_key1 = False
+
         
         
     def _set_up_glfw(self) -> None:
@@ -124,27 +126,15 @@ class GameLoop:
     ################################   CONTROL   ######################################
     def _handle_keys(self) -> None:
 
+        pressed_key1 = self._keys.get(GLFW_CONSTANTS.GLFW_KEY_SPACE, False)
+        if pressed_key1 and not self.pressed_key1:
+            print(f"new camera angle")
 
+            self.scene.cycle_camera_view()
 
-        ############ Move Player ;;;
-        # rate = 0.005*self.frametime
-        # d_pos = np.zeros(3, dtype=np.float32)
-
-        if self._keys.get(GLFW_CONSTANTS.GLFW_KEY_SPACE, False):
-            pass
-        # if self._keys.get(GLFW_CONSTANTS.GLFW_KEY_A, False):
-        #     d_pos -= GLOBAL.Y
-        # if self._keys.get(GLFW_CONSTANTS.GLFW_KEY_S, False):
-        #     d_pos -= GLOBAL.X
-        # if self._keys.get(GLFW_CONSTANTS.GLFW_KEY_D, False):
-        #     d_pos += GLOBAL.Y
-
-        # length = pyrr.vector.length(d_pos)
-        # if abs(length) < 0.00001:
-        #     return
-
-        # d_pos = rate * d_pos / length
-        # self.scene.move_player(d_pos)
+            self.pressed_key1 = True
+        elif not pressed_key1 and self.pressed_key1:
+            self.pressed_key1 = False
 
         
 

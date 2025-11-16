@@ -33,16 +33,7 @@ class Scene:
     
     def __init__(self):
 
-        # CURRRRRRRRRRRRVEYYY
-        # Define control points for the billboard’s path
-        self.bb_path_points = [
-            np.array([40.0, 1.0, 30.0]),  # start
-            np.array([40.0, 1.0, 60.0]),    # curve up left
-            # np.array([2.0, 2.0, -3.0]),   # curve down
-            np.array([40.0, 1.0, 30.0]),   # curve further away
-            np.array([40.0, 1.0, -60.0])    # end
-        ]
-
+        self.view_index = 0
         self._animation_setup()
 
 
@@ -136,9 +127,19 @@ class Scene:
 
     def _animation_setup(self):
 
+        # CURRRRRRRRRRRRVEYYY
+        # Define control points for the billboard’s path
+        self.bb_path_points = [
+            np.array([40.0, 1.0, 30.0]),  # start
+            np.array([40.0, 1.0, 60.0]),    # curve up left
+            # np.array([2.0, 2.0, -3.0]),   # curve down
+            np.array([40.0, 1.0, 30.0]),   # curve further away
+            np.array([40.0, 1.0, -60.0])    # end
+        ]
+
         self.bb_time = 0.0
         self.bb_speed = 0.2          # smaller = slower, bigger = faster
-        
+
         self.bb_angle = 0.0          # current orbit angle in radians
         self.bb_orbit_speed = 0.8    # radians per second
         self.bb_orbit_radius = 20.0  # how far from the player
@@ -150,6 +151,11 @@ class Scene:
         listener.set_position(tuple(self.player.position))
         listener.set_orientation(tuple(self.player.forwards) + tuple(self.player.up))
 
+    def cycle_camera_view(self):
+        """Switch camera to the next angle in GLOBAL.TEST_VIEWS """
+        self.view_index = (self.view_index + 1) % len(GLOBAL.TEST_VIEWS)
+        new_rot = GLOBAL.TEST_VIEWS[self.view_index]
+        self.player.rotation = np.array(new_rot, dtype=np.float32)
 
 
 
