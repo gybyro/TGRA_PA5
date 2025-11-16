@@ -19,6 +19,7 @@ class Camera(Entity):
         self.up = np.zeros(3, dtype=np.float32)
         self.forwards = np.zeros(3, dtype=np.float32)
         self.update(0)
+        self.angle = 0
 
 
     def update(self, timeline_data: dict | None = None) -> None:
@@ -53,7 +54,22 @@ class Camera(Entity):
 
         self.position = np.array(position, dtype=np.float32)
 
+    def get_new_angle(self):
 
+        if self.angle == 0:
+            position = [0.0, 1.0, 0.0]
+            self.angle = 1
+
+        elif self.angle == 1:
+            position = [5.0, -1.0, 5.0]
+            self.up = np.zeros(10, dtype=np.float32)
+            self.angle = 2
+
+        elif self.angle == 2:
+            position = [-3.0, 1.0, 3.0]
+            self.angle = 0
+
+        self.position = np.array(position, dtype=np.float32)
         
 
     def get_view_transform(self) -> np.ndarray:

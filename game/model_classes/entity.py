@@ -41,30 +41,30 @@ class Entity:
     def _get_rotations(self, model_transform):
 
         # rotations:::::
-        model_transform = pyrr.matrix44.multiply(         # X-axis  
-            m1=model_transform,
-            m2=pyrr.matrix44.create_from_axis_rotation(
-                axis = GLOBAL.X,
-                theta = np.radians(self.rotation[0]),
-                dtype = np.float32
-            )
+     
+
+        Rx = pyrr.matrix44.create_from_axis_rotation(        # X-axis
+            axis=GLOBAL.X,
+            theta=np.radians(self.rotation[0]),
+            dtype=np.float32
         )
-        model_transform = pyrr.matrix44.multiply(         # Y-axis  
-            m1=model_transform,
-            m2=pyrr.matrix44.create_from_axis_rotation(
-                axis = GLOBAL.Y,
-                theta = np.radians(self.rotation[1]),
-                dtype = np.float32
-            )
+        Ry = pyrr.matrix44.create_from_axis_rotation(        # Y-axis
+            axis=GLOBAL.Y,
+            theta=np.radians(self.rotation[1]),
+            dtype=np.float32
         )
-        model_transform = pyrr.matrix44.multiply(         # Z-axis  
-            m1=model_transform,
-            m2=pyrr.matrix44.create_from_axis_rotation(
-                axis = GLOBAL.Z,
-                theta = np.radians(self.rotation[2]),
-                dtype = np.float32
-            )
+        Rz = pyrr.matrix44.create_from_axis_rotation(        # Z-axis
+            axis=GLOBAL.Z,
+            theta=np.radians(self.rotation[2]),
+            dtype=np.float32
         )
+
+        # Apply rotations in correct mathematical order:
+        # R_total = Rz * Ry * Rx
+        model_transform = pyrr.matrix44.multiply(Rx, model_transform)
+        model_transform = pyrr.matrix44.multiply(Ry, model_transform)
+        model_transform = pyrr.matrix44.multiply(Rz, model_transform)
+
         return model_transform
 
 

@@ -19,20 +19,20 @@ class Billboard(Entity):
     
     def update(self, camera_pos: np.ndarray) -> None:
         """Rotate so the billboard faces the active camera."""
-        self_to_camera = camera_pos - self.position
 
-        if np.allclose(self_to_camera, 0.0):
+        dir_vec = camera_pos - self.position
+        dir_vec[1] = 0.0     # Remove vertical influence (true billboard)
+
+        if np.allclose(dir_vec, 0.0):
             return
         
-        forward = pyrr.vector.normalize(self_to_camera)
-        horizontal_dist = np.linalg.norm(forward[:2])
+        dir_vec = pyrr.vector.normalize(dir_vec)
+        
+        # billboard mesh is facing +X by default, so we compute yaw from X/Z:
+        yaw = np.degrees(np.arctan2(dir_vec[2], dir_vec[0]))
 
-        yaw = np.degrees(np.arctan2(forward[1], forward[0]))
-        pitch = 0.0 if horizontal_dist == 0.0 else -np.degrees(np.arctan2(forward[2], horizontal_dist))
-
-        self.rotation[0] = 0.0
-        self.rotation[1] = pitch
-        self.rotation[2] = yaw
+        # Lock pitch/roll so it only spins around Y
+        self.rotation[:] = (0.0, yaw, 0.0)
 
 
 class AnimatedBillboard(Billboard):

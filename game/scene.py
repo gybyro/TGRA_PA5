@@ -43,9 +43,7 @@ class Scene:
             np.array([40.0, 1.0, -60.0])    # end
         ]
 
-        self.bb_time = 0.0
-        self.bb_speed = 0.2  # smaller = slower, bigger = faster
-
+        self._animation_setup()
 
 
         ground = Plane(position=[0,-2,0], rotation=[0,0,0], scale=[1,1,1])
@@ -96,8 +94,8 @@ class Scene:
 
             GLOBAL.ENTITY_TYPE["MAXLIGHT"]: [ 
                 Light(
-                    position= [16,3,16],
-                    color= [0.9,1,1],
+                    position= [6,0,6],
+                    color= [0.6,0.5,0.9],
                     strength = 80
                 )
             ],
@@ -125,10 +123,6 @@ class Scene:
             ],
         }
 
-        # if not GLOBAL.DEBUG_FLAT_WALLS:
-        #     self.entities[GLOBAL.ENTITY_TYPE["3D_WALL"]] = walls
-        # else:
-        #     self.entities[GLOBAL.ENTITY_TYPE["WALL"]] = walls
 
         self.player = Camera(
             position = [0, 1, 0],
@@ -137,25 +131,26 @@ class Scene:
 
         self.set_music()
 
-        # self.frames = [
-        #     [16,16,-1],
-        #     [16,15,-1],
-        #     [16,14,-1],
-        #     [16,13,-1],
-        #     [16,12,-1],
-        #     [16,11,-1],
-        #     [16,10,-1],
-        #     [16,9,-1],
-        #     [16,8,-1],
-        #     [16,7,-1],
-        # ]
+        
 
+
+    def _animation_setup(self):
+
+        self.bb_time = 0.0
+        self.bb_speed = 0.2          # smaller = slower, bigger = faster
+        
+        self.bb_angle = 0.0          # current orbit angle in radians
+        self.bb_orbit_speed = 0.8    # radians per second
+        self.bb_orbit_radius = 20.0  # how far from the player
+        self.bb_height = 2.0         # height above player
 
     def set_music(self):
         # Update OpenAL listener position/orientation to match player
         listener = Listener()
         listener.set_position(tuple(self.player.position))
         listener.set_orientation(tuple(self.player.forwards) + tuple(self.player.up))
+
+
 
 
     def update(self, frame_no: int, delta_time: float) -> None:
@@ -179,18 +174,31 @@ class Scene:
 
         self.player.update()
 
+
+        # Bezier animtion
         if delta_time > 0.0:
             # Animate billboards
             for entity in self.entities.get(GLOBAL.ENTITY_TYPE["BILLBOARD"], []):
                 if isinstance(entity, AnimatedBillboard):
                     entity.advance(delta_time)
 
-                    # Move along Bezier path
-                    self.bb_time += delta_time * self.bb_speed
-                    t = (np.sin(self.bb_time) * 0.5) + 0.5  # oscillate back and forth 0→1→0
-                    entity.position = bezier_point(
-                        *self.bb_path_points, t
-                    )
+                    # --- Circular orbit around the player ---
+                    self.bb_angle += delta_time * self.bb_orbit_speed
+                    # keep angle within 0–2π
+                    if self.bb_angle > np.pi * 2:
+                        self.bb_angle -= np.pi * 2
+
+                    # player center position
+                    center = self.player.position
+
+                    # compute orbit position
+                    x = center[0] + self.bb_orbit_radius * np.cos(self.bb_angle)
+                    z = center[2] + self.bb_orbit_radius * np.sin(self.bb_angle)
+                    y = center[1] + self.bb_height
+
+                    entity.position = np.array([x, y, z], dtype=np.float32)
+
+                    entity.update(self.player.position)
 
     def move_player(self, d_pos: list[float]) -> None:
         """Move the player by the given amount in the (right, up, forwards) vectors.
