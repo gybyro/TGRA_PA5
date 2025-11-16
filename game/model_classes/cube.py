@@ -50,3 +50,14 @@ class Cube(Entity):
         min_corner = rotated.min(axis=0)
         max_corner = rotated.max(axis=0)
         return min_corner, max_corner
+
+
+    def update(self, dt: float) -> None:
+
+        self.rotation[1] -= 24 * dt # dt: framerate correction factor.
+        
+        if self.rotation[1] > 360:
+            self.rotation[1] += 360
+
+        if self.position[1] > 0.5:
+            self.position[1] -= 0.1

@@ -36,14 +36,15 @@ class Scene:
         # CURRRRRRRRRRRRVEYYY
         # Define control points for the billboard’s path
         self.bb_path_points = [
-            np.array([12.0, 1.5, 12.0]),  # start
-            np.array([8.0, 3.0, 5.0]),    # curve up left
-            np.array([2.0, 2.0, -3.0]),   # curve down
-            np.array([-6.0, 1.5, 0.0])    # end
+            np.array([40.0, 1.0, 30.0]),  # start
+            np.array([40.0, 1.0, 60.0]),    # curve up left
+            # np.array([2.0, 2.0, -3.0]),   # curve down
+            np.array([40.0, 1.0, 30.0]),   # curve further away
+            np.array([40.0, 1.0, -60.0])    # end
         ]
 
         self.bb_time = 0.0
-        self.bb_speed = 0.1  # smaller = slower, bigger = faster
+        self.bb_speed = 0.2  # smaller = slower, bigger = faster
 
 
 
@@ -116,7 +117,7 @@ class Scene:
             ],
             GLOBAL.ENTITY_TYPE["BILLBOARD"]: [
                 AnimatedBillboard(
-                    position=[12, 1.5, 12],
+                    position=[10, 1, 10],
                     scale=[1.0, 4.0, 4.0],
                     texture_paths=billboard_sequence,
                     frame_rate=billboard_frame_rate,
@@ -130,7 +131,7 @@ class Scene:
         #     self.entities[GLOBAL.ENTITY_TYPE["WALL"]] = walls
 
         self.player = Camera(
-            position = [-5, 1, 0],
+            position = [0, 1, 0],
             rotation = [0, 0, 0]
         )
 
@@ -163,6 +164,13 @@ class Scene:
         #     if entitt == GLOBAL.ENTITY_TYPE["MAXWELL"]:
         #         if len(self.frames) > frame_no:
         #             self.entities[entitt][0].update([self.frames[frame_no]])
+
+        for entities in self.entities.values():
+            for entity in entities:
+                if entity.id == "MAXWELL":
+                    entity.update(delta_time)
+                else:
+                    pass
 
 
         # gently rotate the camera each frame so the skybox is visible

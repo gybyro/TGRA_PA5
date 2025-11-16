@@ -60,7 +60,8 @@ class GameLoop:
         glfw.set_input_mode(
             self.window, 
             GLFW_CONSTANTS.GLFW_CURSOR, 
-            GLFW_CONSTANTS.GLFW_CURSOR_NORMAL
+            # GLFW_CONSTANTS.GLFW_CURSOR_NORMAL
+            GLFW_CONSTANTS.GLFW_CURSOR_HIDDEN
         )
 
         self._keys = {}
