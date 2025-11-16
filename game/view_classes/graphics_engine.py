@@ -136,8 +136,8 @@ class GraphicsEngine:
         # self.skybox = Skybox(self.skybox_shader, "res/images/cubemap_EgyptDay.png")
         self.skybox = Skybox(
             self.skybox_shader,
-            "res/images/cubemap_sky_day.png",
-            "res/images/cubemap_sky_night.png"
+            "res/images/cubemap_sky_night.png",
+            "res/images/cubemap_sky_day.png"
         )
         
 
@@ -151,6 +151,9 @@ class GraphicsEngine:
                 self.shader, "cameraPosition"),
             GLOBAL.UNIFORM_TYPE["MODEL"]: glGetUniformLocation(self.shader, "model"),
             GLOBAL.UNIFORM_TYPE["VIEW"]: glGetUniformLocation(self.shader, "view"),
+            GLOBAL.UNIFORM_TYPE["AMBIENT_STRENGTH"]: glGetUniformLocation(
+                self.shader, "ambientStrength"
+            ),
         }
 
         self.light_locations: dict[int, list[int]] = {
@@ -181,6 +184,16 @@ class GraphicsEngine:
         else:
             glUseProgram(self.shader_light)
             self.shader = self.shader_light
+
+        # skybox gradient + ambient light
+        sky_mix = (np.sin(time.time() * 0.2) * 0.5) + 0.5
+
+        ambient_strength = 0.2 + (0.45 * sky_mix)
+        ambient_location = self.uniform_locations.get(
+            GLOBAL.UNIFORM_TYPE["AMBIENT_STRENGTH"], -1
+        )
+        if ambient_location != -1 and self.shader == self.shader_light:
+            glUniform1f(ambient_location, ambient_strength)
 
 
         # set camera uniforms
@@ -213,8 +226,8 @@ class GraphicsEngine:
 
             for entity in entities:
 
-                if isinstance(entity, Billboard):
-                    entity.update(camera.position)
+                # if isinstance(entity, Billboard):
+                #     entity.update(camera.position)
 
                 if isinstance(material, ImageSequenceMaterial):
                     frame_index = getattr(entity, "current_frame", None)
@@ -271,7 +284,7 @@ class GraphicsEngine:
         view[3, :3] = 0.0
         view[3, 3] = 1.0
 
-        self.skybox.mix_value = (np.sin(time.time() * 0.2) * 0.5) + 0.5
+        self.skybox.mix_value = sky_mix
 
         self.skybox.draw(view, self.projection_transform)
         glDepthMask(GL_TRUE)

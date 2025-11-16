@@ -12,10 +12,10 @@ RES = WIDTH, HEIGHT = 1400, 800
 FPS = 60
 
 TEST_VIEWS = [
-    [0,   0,   0],     # View 0  (roll, yaw, pitch)
-    [0,  90,   0],     # View 1
-    [0, 180,   0],     # View 2
-    [0, 270,   0],     # View 3
+    { "rot": [6,  0,   -90], "pos": [6, 18, 6] },
+    { "rot": [0,  0,   0], "pos": [0, 1, 0] },
+    { "rot": [0,  0,  20], "pos": [-10, -4, -10] },
+    { "rot": [0, 180,  0], "pos": [0, 1, 10] },
 ]
 
 ############################## Constants ######################################
@@ -55,4 +55,5 @@ UNIFORM_TYPE = {
     "LIGHT_COLOR": 4,
     "LIGHT_POS": 5,
     "LIGHT_STRENGTH": 6,
+    "AMBIENT_STRENGTH": 7,
 }

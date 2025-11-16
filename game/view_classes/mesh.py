@@ -83,14 +83,24 @@ class RectMesh(Mesh):
         super().__init__()
 
         # position: x, y, z,    uv: s(0:L, 1:R), t(0:T, 1:B)   normal: x, y, z,
-        vertices = (
-            -w/2,  h/2, 0,  0, 0,  1, 0, 0,
-            -w/2, -h/2, 0,  0, 1,  1, 0, 0,
-             w/2, -h/2, 0,  1, 1,  1, 0, 0,
+        # vertices = (
+        #     -w/2,  h/2, 0,  0, 0,  1, 0, 0,
+        #     -w/2, -h/2, 0,  0, 1,  1, 0, 0,
+        #      w/2, -h/2, 0,  1, 1,  1, 0, 0,
 
-            -w/2,  h/2, 0,  0, 0,  1, 0, 0,
-             w/2, -h/2, 0,  1, 1,  1, 0, 0,
-             w/2,  h/2, 0,  1, 0,  1, 0, 0
+        #     -w/2,  h/2, 0,  0, 0,  1, 0, 0,
+        #      w/2, -h/2, 0,  1, 1,  1, 0, 0,
+        #      w/2,  h/2, 0,  1, 0,  1, 0, 0
+        # )
+        vertices = (
+            # position           UV       normal
+            -w/2,  h/2, 0,       0, 1,    1, 0, 0,   # top-left
+             w/2,  h/2, 0,       1, 1,    1, 0, 0,   # top-right
+             w/2, -h/2, 0,       1, 0,    1, 0, 0,   # bottom-right
+
+            -w/2,  h/2, 0,       0, 1,    1, 0, 0,
+             w/2, -h/2, 0,       1, 0,    1, 0, 0,
+            -w/2, -h/2, 0,       0, 0,    1, 0, 0    # bottom-left
         )
         vertices = np.array(vertices, dtype=np.float32)
         self.vertex_count = 6

@@ -13,7 +13,7 @@ in vec3 fragmentNormal;
 
 uniform sampler2D imageTexture;
 uniform PointLight Lights[8];
-// uniform vec3 ambient;
+uniform float ambientStrength;
 uniform vec3 cameraPosition;
 
 uniform bool useTexture;   // toggle for texture or pure color
@@ -50,7 +50,7 @@ void main()
 
     // Texture color
     vec4 texColor = texture(imageTexture, fragmentTexCoord);
-    if (texColor.a <= 0.001) {
+    if (texColor.a <= 0.4) {
         discard;
     }
     vec3 baseColor = texColor.rgb;
@@ -62,7 +62,7 @@ void main()
     vec3 viewDir = normalize(cameraPosition - fragmentPosition);
 
     // Ambient term
-    vec3 ambient = 0.3 * baseColor;
+    vec3 ambient = ambientStrength * baseColor;
 
     // Accumulate light contributions
     vec3 lighting = ambient;

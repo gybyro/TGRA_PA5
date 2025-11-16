@@ -19,27 +19,44 @@ class Camera(Entity):
         self.up = np.zeros(3, dtype=np.float32)
         self.forwards = np.zeros(3, dtype=np.float32)
         self.update(0)
-        self.angle = 0
 
 
     def update(self, timeline_data: dict | None = None) -> None:
 
-        # where we are looking in the horizontal plane (north, east, south, west)
-        theta = -self.rotation[2]
-        # where we are looking vertically (up, down)
-        phi = self.rotation[1]
+        roll  = self.rotation[0]
+        yaw   = self.rotation[1]
+        pitch = self.rotation[2]
+
+        # convert to radians
+        yaw_r   = np.deg2rad(yaw)
+        pitch_r = np.deg2rad(pitch)
+
+        # self.forwards = np.array(
+        #     [
+        #         np.cos(np.deg2rad(theta)) * np.cos(np.deg2rad(phi)),
+        #         np.sin(np.deg2rad(phi)),
+        #         np.sin(np.deg2rad(theta)) * np.cos(np.deg2rad(phi)),
+        #     ],
+        #     dtype = np.float32
+        # )
 
         self.forwards = np.array(
             [
-                np.cos(np.deg2rad(theta)) * np.cos(np.deg2rad(phi)),
-                np.sin(np.deg2rad(phi)),
-                np.sin(np.deg2rad(theta)) * np.cos(np.deg2rad(phi)),
+                np.cos(yaw_r) * np.cos(pitch_r),
+                np.sin(pitch_r),
+                np.sin(yaw_r) * np.cos(pitch_r),
             ],
-            dtype = np.float32
+            dtype=np.float32
         )
 
-        self.right = np.cross(self.forwards, GLOBAL.Y)
+        # World up
+        world_up = GLOBAL.Y
+
+        # Right = forward × up
+        self.right = np.cross(self.forwards, world_up)
         self.right /= np.linalg.norm(self.right)
+
+        # Up = right × forward
         self.up = np.cross(self.right, self.forwards)
         self.up /= np.linalg.norm(self.up)
 
@@ -51,23 +68,6 @@ class Camera(Entity):
         position = camera_state.get("position", self.position)
         target = camera_state.get("target", self.position + self.forwards)
         up = camera_state.get("up", self.up)
-
-        self.position = np.array(position, dtype=np.float32)
-
-    def get_new_angle(self):
-
-        if self.angle == 0:
-            position = [0.0, 1.0, 0.0]
-            self.angle = 1
-
-        elif self.angle == 1:
-            position = [5.0, -1.0, 5.0]
-            self.up = np.zeros(10, dtype=np.float32)
-            self.angle = 2
-
-        elif self.angle == 2:
-            position = [-3.0, 1.0, 3.0]
-            self.angle = 0
 
         self.position = np.array(position, dtype=np.float32)
         
@@ -86,6 +86,7 @@ class Camera(Entity):
         self.rotation += d_eulers
 
         self.rotation[0] %= 360
+        self.rotation[1] %= 360
         # rotation lock for gameplay # 
-        self.rotation[1] = min(89, max(-89, self.rotation[1]))
-        self.rotation[2] %= 360
+        self.rotation[2] = min(89, max(-89, self.rotation[2]))
+        

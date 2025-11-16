@@ -128,7 +128,6 @@ class GameLoop:
 
         pressed_key1 = self._keys.get(GLFW_CONSTANTS.GLFW_KEY_SPACE, False)
         if pressed_key1 and not self.pressed_key1:
-            print(f"new camera angle")
 
             self.scene.cycle_camera_view()
 
@@ -136,17 +135,37 @@ class GameLoop:
         elif not pressed_key1 and self.pressed_key1:
             self.pressed_key1 = False
 
-        
-
+    
     def _handle_mouse(self) -> None:
+        x, y = glfw.get_cursor_pos(self.window)
 
-        (x,y) = glfw.get_cursor_pos(self.window)
-        d_eulers = 0.05 * ((GLOBAL.WIDTH / 2) - x) * GLOBAL.Z
-        d_eulers += 0.05 * ((GLOBAL.HEIGHT / 2) - y) * GLOBAL.Y
-        self.scene.spin_player(d_eulers)
+        # how far we moved from window center
+        dx = (GLOBAL.WIDTH / 2)  - x
+        dy = (GLOBAL.HEIGHT / 2) - y
+
+        sensitivity = 0.1  # adjust to taste
         
-        # Center the mouse
+        d_yaw   = dx * sensitivity # rotation[1]
+        d_pitch = dy * sensitivity # rotation[2]
+
+        # build Euler delta vector: (roll, yaw, pitch)
+        d_eulers = np.array([0.0, -d_yaw, d_pitch], dtype=np.float32)
+
+        # apply to camera
+        self.scene.spin_player(d_eulers)
+
+        # re-center cursor
         glfw.set_cursor_pos(self.window, GLOBAL.WIDTH / 2, GLOBAL.HEIGHT / 2)
+
+    # def _handle_mouse(self) -> None:
+
+    #     (x,y) = glfw.get_cursor_pos(self.window)
+    #     d_eulers = 0.05 * ((GLOBAL.WIDTH / 2) - x) * GLOBAL.Z
+    #     d_eulers += 0.05 * ((GLOBAL.HEIGHT / 2) - y) * GLOBAL.Y
+    #     self.scene.spin_player(d_eulers)
+        
+    #     # Center the mouse
+    #     glfw.set_cursor_pos(self.window, GLOBAL.WIDTH / 2, GLOBAL.HEIGHT / 2)
 
     ################################   COLLISION   ######################################
 

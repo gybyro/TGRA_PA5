@@ -17,6 +17,12 @@ class Billboard(Entity):
         super().__init__(position, rotation=[0.0, 0.0, 0.0], scale=scale or [1.0, 1.0, 1.0])
         self.id = "bill"
     
+    # def update(self, dt: float, camera_pos: np.ndarray) -> None:
+    #     self_to_camera = camera_pos - self.position
+    #     self.rotation[2] = -np.degrees(np.arctan2(-self_to_camera[1], self_to_camera[0]))
+    #     dist2d = pyrr.vector.length(self_to_camera)
+    #     self.rotation[1] = -np.degrees(np.arctan2(self_to_camera[2], dist2d))
+
     def update(self, camera_pos: np.ndarray) -> None:
         """Rotate so the billboard faces the active camera."""
 
@@ -29,10 +35,12 @@ class Billboard(Entity):
         dir_vec = pyrr.vector.normalize(dir_vec)
         
         # billboard mesh is facing +X by default, so we compute yaw from X/Z:
-        yaw = np.degrees(np.arctan2(dir_vec[2], dir_vec[0]))
+        yaw = np.degrees(np.arctan2(dir_vec[0], dir_vec[2]))
 
         # Lock pitch/roll so it only spins around Y
         self.rotation[:] = (0.0, yaw, 0.0)
+
+
 
 
 class AnimatedBillboard(Billboard):

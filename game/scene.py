@@ -44,7 +44,7 @@ class Scene:
         # walls = self.maze.wall_entities
 
         # # put max in the correct cell
-        max = Cube(position = [6,-1,6], rotation = [0,0,0], scale = [0.1, 0.1, 0.1])
+        max = Cube(position = [7,-1, 0], rotation = [0,0,0], scale = [0.1, 0.1, 0.1])
         # cx, cy = self.maze.get_player_cell(max.position)
         # self.maze.cells[cy * GLOBAL.GRID_SIZE + cx].entities.append(max)
 
@@ -85,8 +85,8 @@ class Scene:
 
             GLOBAL.ENTITY_TYPE["MAXLIGHT"]: [ 
                 Light(
-                    position= [6,0,6],
-                    color= [0.6,0.5,0.9],
+                    position= [0,0,0],
+                    color= [0.5,0.3,0.8],
                     strength = 80
                 )
             ],
@@ -130,17 +130,17 @@ class Scene:
         # CURRRRRRRRRRRRVEYYY
         # Define control points for the billboard’s path
         self.bb_path_points = [
-            np.array([40.0, 1.0, 30.0]),  # start
-            np.array([40.0, 1.0, 60.0]),    # curve up left
+            np.array([0.0, 1.0, 30.0]),  # start
+            np.array([0.0, 1.0, 60.0]),    # curve up left
             # np.array([2.0, 2.0, -3.0]),   # curve down
-            np.array([40.0, 1.0, 30.0]),   # curve further away
-            np.array([40.0, 1.0, -60.0])    # end
+            np.array([0.0, 1.0, 30.0]),   # curve further away
+            np.array([0.0, 1.0, -60.0])    # end
         ]
 
         self.bb_time = 0.0
         self.bb_speed = 0.2          # smaller = slower, bigger = faster
 
-        self.bb_angle = 0.0          # current orbit angle in radians
+        self.bb_angle = 0.5          # current orbit angle in radians
         self.bb_orbit_speed = 0.8    # radians per second
         self.bb_orbit_radius = 20.0  # how far from the player
         self.bb_height = 2.0         # height above player
@@ -154,8 +154,14 @@ class Scene:
     def cycle_camera_view(self):
         """Switch camera to the next angle in GLOBAL.TEST_VIEWS """
         self.view_index = (self.view_index + 1) % len(GLOBAL.TEST_VIEWS)
-        new_rot = GLOBAL.TEST_VIEWS[self.view_index]
-        self.player.rotation = np.array(new_rot, dtype=np.float32)
+        view = GLOBAL.TEST_VIEWS[self.view_index]
+
+        # update rotation (roll, yaw, pitch)
+        self.player.rotation = np.array(view["rot"], dtype=np.float32)
+        # update position
+        self.player.position = np.array(view["pos"], dtype=np.float32)
+        # update camera internal vectors
+        self.player.update()
 
 
 
@@ -181,30 +187,33 @@ class Scene:
         self.player.update()
 
 
-        # Bezier animtion
-        if delta_time > 0.0:
-            # Animate billboards
-            for entity in self.entities.get(GLOBAL.ENTITY_TYPE["BILLBOARD"], []):
-                if isinstance(entity, AnimatedBillboard):
-                    entity.advance(delta_time)
+        # --- Billboard world-centered orbit animation ---
+        for entity in self.entities.get(GLOBAL.ENTITY_TYPE["BILLBOARD"], []):
+            if isinstance(entity, AnimatedBillboard):
+                # animation frames
+                entity.advance(delta_time)
 
-                    # --- Circular orbit around the player ---
-                    self.bb_angle += delta_time * self.bb_orbit_speed
-                    # keep angle within 0–2π
-                    if self.bb_angle > np.pi * 2:
-                        self.bb_angle -= np.pi * 2
+                # update orbital angle
+                self.bb_angle += delta_time * self.bb_orbit_speed
+                if self.bb_angle > np.pi * 2:
+                    self.bb_angle -= np.pi * 2
 
-                    # player center position
-                    center = self.player.position
+                # orbit center = world origin (0,0,0)
+                center = np.array([0.0, 0.0, 0.0], dtype=np.float32)
 
-                    # compute orbit position
-                    x = center[0] + self.bb_orbit_radius * np.cos(self.bb_angle)
-                    z = center[2] + self.bb_orbit_radius * np.sin(self.bb_angle)
-                    y = center[1] + self.bb_height
+                # compute orbit position
+                x = center[0] + self.bb_orbit_radius * np.cos(self.bb_angle)
+                y = self.bb_height
+                z = center[2] + self.bb_orbit_radius * np.sin(self.bb_angle)
+                
 
-                    entity.position = np.array([x, y, z], dtype=np.float32)
+                # assign position
+                entity.position = np.array([x, y, z], dtype=np.float32)
 
-                    entity.update(self.player.position)
+                # make billboard face the player
+                entity.update(self.player.position)
+
+
 
     def move_player(self, d_pos: list[float]) -> None:
         """Move the player by the given amount in the (right, up, forwards) vectors.
