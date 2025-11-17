@@ -9,9 +9,9 @@ from game.model_classes.entity import Entity
 class Cube(Entity):
     __slots__ = tuple([])
 
-    def __init__(self, position: list[float], rotation: list[float], scale: list[float]):
+    def __init__(self, position: list[float], rotation: list[float], scale: list[float], id = "MAXWELL"):
         super().__init__(position, rotation, scale)
-        self.id = "MAXWELL"
+        self.id = id
         
 
     def get_aabb(self):

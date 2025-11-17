@@ -37,17 +37,6 @@ class Scene:
         self._animation_setup()
 
 
-        ground = Plane(position=[0,-2,0], rotation=[0,0,0], scale=[1,1,1])
-
-        # self.maze = Maze(ground)
-        # self.maze.generate_walls()
-        # walls = self.maze.wall_entities
-
-        # # put max in the correct cell
-        max = Cube(position = [7,-1, 0], rotation = [0,0,0], scale = [0.1, 0.1, 0.1])
-        # cx, cy = self.maze.get_player_cell(max.position)
-        # self.maze.cells[cy * GLOBAL.GRID_SIZE + cx].entities.append(max)
-
         billboard_sequence = (
             "res/images/animation_test/fleeting_1.png",
             "res/images/animation_test/fleeting_2.png",
@@ -69,18 +58,23 @@ class Scene:
         }
 
 
+        truck = Cube(position = [-100,60, -120], rotation = [-90,0,0], scale = [0.05, 0.05, 0.05])
+        truck.id = "AIRPLANE"
+
+
         self.entities: dict[int, list[Entity]] = {
 
             GLOBAL.ENTITY_TYPE["GROUND"]: [
-                ground,
+                Plane(position=[0,-2,0], rotation=[0,0,0], scale=[1,1,1]),
             ],
-
-            # GLOBAL.ENTITY_TYPE["3D_WALL"]: walls,
-
             GLOBAL.ENTITY_TYPE["CUBE"]: [
                 Cube(position = [5,0,5], rotation = [0,0,0], scale = [1, 1, 1]),
             ],
-            GLOBAL.ENTITY_TYPE["MAXWELL"]: [ max,
+            GLOBAL.ENTITY_TYPE["MAXWELL"]: [
+                Cube(position = [7,-1, 0], rotation = [0,0,0], scale = [0.1, 0.1, 0.1]),
+            ],
+            GLOBAL.ENTITY_TYPE["AIRPLANE"]: [
+                truck,
             ],
 
             GLOBAL.ENTITY_TYPE["MAXLIGHT"]: [ 
@@ -129,12 +123,17 @@ class Scene:
 
         # CURRRRRRRRRRRRVEYYY
         # Define control points for the billboard’s path
-        self.bb_path_points = [
-            np.array([0.0, 1.0, 30.0]),  # start
-            np.array([0.0, 1.0, 60.0]),    # curve up left
-            # np.array([2.0, 2.0, -3.0]),   # curve down
-            np.array([0.0, 1.0, 30.0]),   # curve further away
-            np.array([0.0, 1.0, -60.0])    # end
+        self.pos_path_points = [
+            np.array([-100,60.0,-140]),
+            np.array([-200,50.0,-140]),
+            np.array([-100,60.0,-140]),
+            np.array([-10.0,50.0,-140])
+        ]
+        self.rot_path_points = [
+            np.array([-90.5,  0.0,   0.0]),
+            np.array([-90, -40.0, 0.0]),
+            np.array([-89.5,  0.0,   0.0]),
+            np.array([-90, 30.0,  0.0]),
         ]
 
         self.bb_time = 0.0
@@ -186,6 +185,22 @@ class Scene:
 
         self.player.update()
 
+        # Bezier animtion
+        if delta_time > 0.0:
+            # Animate billboards
+            for entity in self.entities.get(GLOBAL.ENTITY_TYPE["AIRPLANE"], []):
+
+                # Move along Bezier path (pos)
+                self.bb_time += delta_time * self.bb_speed
+                t = (np.sin(self.bb_time) * 0.5) + 0.5  # oscillate back and forth 0→1→0
+                
+                entity.position = bezier_point(
+                    *self.pos_path_points, t
+                )
+                entity.rotation = bezier_point(
+                    *self.rot_path_points, t
+                ) % 360
+                
 
         # --- Billboard world-centered orbit animation ---
         for entity in self.entities.get(GLOBAL.ENTITY_TYPE["BILLBOARD"], []):

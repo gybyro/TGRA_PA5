@@ -6,7 +6,7 @@ DEBUG_SHOW_HITBOX = False
 DEBUG_FLY = False
 DEBUG_FLAT_WALLS = False
 DEBUG_GENERATE_MAZE = False
-DEBUG_NORMAL = False
+DEBUG_NORMAL = True
 
 RES = WIDTH, HEIGHT = 1400, 800
 FPS = 60
@@ -15,7 +15,7 @@ TEST_VIEWS = [
     { "rot": [6,  0,   -90], "pos": [6, 18, 6] },
     { "rot": [0,  0,   0], "pos": [0, 1, 0] },
     { "rot": [0,  0,  20], "pos": [-10, -4, -10] },
-    { "rot": [0, 180,  0], "pos": [0, 1, 10] },
+    { "rot": [0, -110,  10], "pos": [0, 1, 10] },
 ]
 
 ############################## Constants ######################################
@@ -45,6 +45,7 @@ ENTITY_TYPE = {
     "WHISK": 6,
     "MAXLIGHT": 7,
     "BILLBOARD": 8,
+    "AIRPLANE": 9,
 }
 
 UNIFORM_TYPE = {

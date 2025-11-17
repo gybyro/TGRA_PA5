@@ -80,7 +80,7 @@ class GraphicsEngine:
             fovy = self.current_fov,
             aspect = GLOBAL.WIDTH/GLOBAL.HEIGHT,
             near = 0.1, 
-            far = 100, 
+            far = 1000, 
             dtype=np.float32
         )
         # then send that over to the shader
@@ -95,11 +95,14 @@ class GraphicsEngine:
     def _create_assets(self) -> None:
 
         # this is a dict containing all the obj meshes, (each one has its own folder plz)
-        self.objects = [
-            CoolObjMesh(
+        self.objects: dict[int, CoolObjMesh] = {
+            GLOBAL.ENTITY_TYPE["MAXWELL"]: CoolObjMesh(
                 "res/3D_models/maxwell/maxwell.54d410c0.obj", 
                 "res/3D_models/maxwell/maxwell.54d410c0.mtl"),
-        ]
+            GLOBAL.ENTITY_TYPE["AIRPLANE"]: CoolObjMesh(
+                "res/3D_models/airplane/11805_airplane_v2_L2.obj", 
+                "res/3D_models/airplane/11805_airplane_v2_L2.mtl"),
+        }
 
         # meshes that dont use objs
         self.meshes: dict[int, Mesh] = {
@@ -239,19 +242,23 @@ class GraphicsEngine:
                     self.uniform_locations[GLOBAL.UNIFORM_TYPE["MODEL"]],
                     1, GL_FALSE, entity.get_model_transform()
                 )
-                if entity.id != "MAXWELL":
-                    normal_matrix_loc = glGetUniformLocation(self.shader, "normalMatrix")
-                    glUniformMatrix3fv(normal_matrix_loc, 1, GL_TRUE, entity.get_normal_matrix())
+                # if entity.id != "MAXWELL":
+                #     normal_matrix_loc = glGetUniformLocation(self.shader, "normalMatrix")
+                #     glUniformMatrix3fv(normal_matrix_loc, 1, GL_TRUE, entity.get_normal_matrix())
                
                 
                 mesh.draw()
 
         ######### draw obj meshes
-        for object in self.objects:
+        for entity_type, entities in renderables.items():
+            if entity_type not in self.objects:
+                continue
+
+            object = self.objects[entity_type]
 
             glUniformMatrix4fv(
                 self.uniform_locations[GLOBAL.UNIFORM_TYPE["MODEL"]],
-                1, GL_FALSE, renderables[GLOBAL.ENTITY_TYPE["MAXWELL"]][0].get_model_transform()
+                1, GL_FALSE, renderables[entity_type][0].get_model_transform()
             )
             object.draw()
 
