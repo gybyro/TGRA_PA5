@@ -14,9 +14,9 @@ check out the config.py file under the Debug menu for more options and settings 
 program dependencies / pip installs:
 - make sure your pyhton version is 3.13
 - python.exe -m pip install --upgrade pip
-pip install numpy
-pip install glfw
-pip install PyOpenGL
-pip install pyrr
-pip install pillow
-pip install pyopenal
+- pip install numpy
+- pip install glfw
+- pip install PyOpenGL
+- pip install pyrr
+- pip install pillow
+- pip install pyopenal
