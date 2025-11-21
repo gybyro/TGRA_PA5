@@ -7,13 +7,6 @@ uniform samplerCube uSkyboxA;
 uniform samplerCube uSkyboxB;
 uniform float uMix; // 0.0 = skyboxA, 1.0 = skyboxB
 
-// void main()
-// {
-//     FragColor = texture(skybox, TexCoords);
-// }
-
-
-
 void main()
 {
     vec3 dir = normalize(TexCoords);

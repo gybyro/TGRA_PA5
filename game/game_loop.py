@@ -9,7 +9,6 @@ import time
 
 import config as GLOBAL
 from game.scene import Scene
-from game.view_classes.frames import Frames
 from game.view_classes.graphics_engine import GraphicsEngine
 
 
@@ -20,7 +19,6 @@ class GameLoop:
         self._set_up_input_systems()
 
         self.scene = Scene()
-        self.frames = Frames()
         self.graph = GraphicsEngine(self.scene)
 
         self.pressed_key1 = False

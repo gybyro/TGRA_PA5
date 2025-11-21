@@ -157,6 +157,9 @@ class GraphicsEngine:
             GLOBAL.UNIFORM_TYPE["AMBIENT_STRENGTH"]: glGetUniformLocation(
                 self.shader, "ambientStrength"
             ),
+            GLOBAL.UNIFORM_TYPE["IS_BILLBOARD"]: glGetUniformLocation(
+                self.shader, "uIsBillboard"
+            ),
         }
 
         self.light_locations: dict[int, list[int]] = {
@@ -208,6 +211,13 @@ class GraphicsEngine:
             self.uniform_locations[GLOBAL.UNIFORM_TYPE["CAMERA_POS"]],
             1, camera.position
         )
+
+        billboard_flag = self.uniform_locations.get(
+            GLOBAL.UNIFORM_TYPE["IS_BILLBOARD"], -1
+        )
+
+        if billboard_flag != -1:
+            glUniform1i(billboard_flag, 0)
  
 
         # draw all the entities
@@ -232,6 +242,12 @@ class GraphicsEngine:
                 # if isinstance(entity, Billboard):
                 #     entity.update(camera.position)
 
+                if billboard_flag != -1:
+                    is_billboard = isinstance(entity, Billboard) or (
+                        entity_type == GLOBAL.ENTITY_TYPE.get("BILLBOARD")
+                    )
+                    glUniform1i(billboard_flag, int(is_billboard))
+
                 if isinstance(material, ImageSequenceMaterial):
                     frame_index = getattr(entity, "current_frame", None)
                     material.use(frame_index)
@@ -249,6 +265,10 @@ class GraphicsEngine:
                 
                 mesh.draw()
 
+        if billboard_flag != -1:
+            glUniform1i(billboard_flag, 0)
+
+        
         ######### draw obj meshes
         for entity_type, entities in renderables.items():
             if entity_type not in self.objects:

@@ -8,6 +8,8 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
+uniform bool uIsBillboard; // buh
+
 uniform vec2 uTexRepeat;  // passed from RepeatingMaterial
 
 out vec2 fragmentTexCoord;
@@ -20,7 +22,16 @@ void main()
     fragmentPosition = worldPos.xyz;
 
     // Properly transform normal by inverse-transpose of model matrix
-    fragmentNormal = mat3(transpose(inverse(model))) * vertexNormal;
+    // fragmentNormal = mat3(transpose(inverse(model))) * vertexNormal;
+
+    // Use a fixed facing normal for billboards to avoid lighting drift as they rotate
+    if (uIsBillboard) {
+        fragmentNormal = vec3(0.0, 0.0, 1.0);
+    } else {
+        // Properly transform normal by inverse-transpose of model matrix
+        fragmentNormal = mat3(transpose(inverse(model))) * vertexNormal;
+    }
+
     fragmentNormal = normalize(fragmentNormal);
 
     fragmentTexCoord = vertexTexCoord * uTexRepeat; // repeated textures
