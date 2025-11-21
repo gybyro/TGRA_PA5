@@ -193,7 +193,7 @@ class GameLoop:
     def quit(self) -> None:
         self.graph.destroy()
         oalQuit()
-        quit()
+        glfw.terminate()
 
 
 if __name__ == "__main__":

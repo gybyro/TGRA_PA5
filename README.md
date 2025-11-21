@@ -1,17 +1,15 @@
-# To Run
-run main.py from within the "dungeon" folder.
+# computer graphics programming course 2025 - final assignment
+- Made by GB
+
+
+# How To Run
+The exe file only works on windows.
+for other systems, run main.py from within the "TGRA_PA5" folder.
+
 
 to stop running the program, simply press the ESC key.
+check out the config.py file under the Debug menu for more options and settings on window size.
 
-the axis follow the blender standard (where z is up, sorry in advance)
-During runtime you can also press:
-
-1_KEY toggle  ---  reset player position inside the maze
-2_KEY toggle  ---  show hitboxes
-3_KEY toggle  ---  enable/disable hitboxes
-4_KEY toggle  ---  fly/unlock the z axis
-
-check out the config.py file under the Debug menu for more options and settings on window size and maze generations
 
 program dependencies / pip installs:
 - make sure your pyhton version is 3.13

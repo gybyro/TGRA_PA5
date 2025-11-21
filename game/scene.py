@@ -1,6 +1,7 @@
 import numpy as np
 import time
 import config as GLOBAL
+import utils as utils
 from game.model_classes.entity import Entity
 from game.model_classes.camera import Camera
 from game.model_classes.plane import Plane
@@ -36,18 +37,11 @@ class Scene:
         self.view_index = 0
         self._animation_setup()
 
-
-        billboard_sequence = (
-            "res/images/animation_test/fleeting_1.png",
-            "res/images/animation_test/fleeting_2.png",
-            "res/images/animation_test/fleeting_3.png",
-            "res/images/animation_test/fleeting_4.png",
-            "res/images/animation_test/fleeting_5.png",
-            "res/images/animation_test/fleeting_6.png",
-            "res/images/animation_test/fleeting_7.png",
-            "res/images/animation_test/fleeting_8.png",
-            "res/images/animation_test/fleeting_9.png",
-        )
+        # la creatura
+        billboard_sequence = [
+            utils.asset(f"res/images/animation_test/fleeting_{i}.png")
+            for i in range(1, 10)
+        ]
         billboard_frame_rate = 9.0
 
         self.animation_sequences: dict[int, dict[str, object]] = {

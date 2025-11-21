@@ -6,6 +6,7 @@ import pyrr
 import time
 
 import config as GLOBAL
+import utils
 from game.model_classes.entity import Entity
 from game.model_classes.billboard import Billboard
 from game.model_classes.camera import Camera
@@ -97,11 +98,13 @@ class GraphicsEngine:
         # this is a dict containing all the obj meshes, (each one has its own folder plz)
         self.objects: dict[int, CoolObjMesh] = {
             GLOBAL.ENTITY_TYPE["MAXWELL"]: CoolObjMesh(
-                "res/3D_models/maxwell/maxwell.54d410c0.obj", 
-                "res/3D_models/maxwell/maxwell.54d410c0.mtl"),
+                utils.asset("res/3D_models/maxwell/maxwell.54d410c0.obj"), 
+                utils.asset("res/3D_models/maxwell/maxwell.54d410c0.mtl"),
+                ),
             GLOBAL.ENTITY_TYPE["AIRPLANE"]: CoolObjMesh(
-                "res/3D_models/airplane/11805_airplane_v2_L2.obj", 
-                "res/3D_models/airplane/11805_airplane_v2_L2.mtl"),
+                utils.asset("res/3D_models/airplane/11805_airplane_v2_L2.obj"), 
+                utils.asset("res/3D_models/airplane/11805_airplane_v2_L2.mtl"),
+                ),
         }
 
         # meshes that dont use objs
@@ -118,29 +121,29 @@ class GraphicsEngine:
         # non obj meshes need to be bound to textures
         self.materials: dict[int, Material] = {
             # GLOBAL.ENTITY_TYPE["GROUND"]: RepeatingMaterial("res/images/tile.png", texture_repeat=(GLOBAL.GRID_SIZE, GLOBAL.GRID_SIZE)),
-            GLOBAL.ENTITY_TYPE["3D_WALL"]: Material("res/images/wood_albedo.png"),
-            GLOBAL.ENTITY_TYPE["POINTLIGHT"]: Material("res/images/white.png"),
-            GLOBAL.ENTITY_TYPE["MAXLIGHT"]: Material("res/images/white.png"),
+            GLOBAL.ENTITY_TYPE["3D_WALL"]: Material(utils.asset("res/images/wood_albedo.png")),
+            GLOBAL.ENTITY_TYPE["POINTLIGHT"]: Material(utils.asset("res/images/white.png")),
+            GLOBAL.ENTITY_TYPE["MAXLIGHT"]: Material(utils.asset("res/images/white.png")),
         }
 
         billboard_type = GLOBAL.ENTITY_TYPE.get("BILLBOARD")
         if billboard_type is not None:
             sequence_info = getattr(self.scene, "animation_sequences", {}).get(billboard_type, {})
-            sequence_paths = sequence_info.get("paths", ("res/images/white.png",))
+            sequence_paths = sequence_info.get("paths", (utils.asset("res/images/white.png"),))
             frame_rate = sequence_info.get("frame_rate", 1.0)
             self.materials[billboard_type] = ImageSequenceMaterial(sequence_paths, frame_rate=frame_rate)
 
 
-        self.shader_light = create_shader("res/shaders/vertex.vert", "res/shaders/fragment.frag")
-        self.shader_normals = create_shader("res/shaders/vertex.vert", "res/shaders/normal_frag.frag")
+        self.shader_light = create_shader(utils.asset("res/shaders/vertex.vert"), utils.asset("res/shaders/fragment.frag"))
+        self.shader_normals = create_shader(utils.asset("res/shaders/vertex.vert"), utils.asset("res/shaders/normal_frag.frag"))
         
         # Skybox
-        self.skybox_shader = create_shader("res/shaders/skybox.vert", "res/shaders/skybox.frag")
+        self.skybox_shader = create_shader(utils.asset("res/shaders/skybox.vert"), utils.asset("res/shaders/skybox.frag"))
         # self.skybox = Skybox(self.skybox_shader, "res/images/cubemap_EgyptDay.png")
         self.skybox = Skybox(
             self.skybox_shader,
-            "res/images/cubemap_sky_night.png",
-            "res/images/cubemap_sky_day.png"
+            utils.asset("res/images/cubemap_sky_night.png"),
+            utils.asset("res/images/cubemap_sky_day.png")
         )
         
 
